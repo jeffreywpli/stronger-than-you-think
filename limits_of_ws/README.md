@@ -6,19 +6,13 @@ This project is based on the wrench library. Please visit [link](https://github.
 [1] Install anaconda:
 Instructions here: https://www.anaconda.com/download/
 
-[2] Clone the repository:
-```
-git clone https://github.com/safranchik/limits-of-ws.git
-cd limits-of-ws
-```
-
-[3] Create virtual environment:
+[2] Create virtual environment:
 ```
 conda env create -f environment.yml
 source activate wrench
 ```
 
-[4] Download the dataset:
+[3] Download the dataset:
 
 The datasets can be downloaded via [this](https://drive.google.com/drive/folders/1v55IKG2JN9fMtKJWU48B_5_DcPWGnpTq?usp=sharing).
 
@@ -26,7 +20,7 @@ Move the datasets folder to the limits-of-ws directory.
 
 ## Using the pipeline
 
-[1] Inside the limits-of-ws directory
+[4] Inside the limits-of-ws directory
 
 '''
 python3 pipeline.py
