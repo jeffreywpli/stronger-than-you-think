@@ -1,0 +1,38 @@
+{
+  "optimizer_lr": [
+    1e-05,
+    3e-05,
+    5e-05
+  ],
+  "optimizer_weight_decay": [
+    1e-4
+  ],
+  "batch_size": [
+    8, 
+    16, 
+    32
+  ],
+  "teacher_update": [
+    400
+  ],
+  "lamda": [
+    0.01,
+    0.05,
+    0.1
+  ],
+  "thresh": [
+    0.2,
+    0.4,
+    0.6,
+    0.8
+  ],
+  "margin": [
+    1.0
+  ],
+  "mu": [
+    1.0
+  ],
+  "use_lr_scheduler": [
+    true
+  ]
+}

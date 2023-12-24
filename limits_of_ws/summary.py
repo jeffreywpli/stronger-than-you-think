@@ -1,0 +1,47 @@
+import argparse
+import contextlib
+import gc
+import json
+import logging
+import multiprocessing
+import os
+import signal
+import sys
+from pprint import pprint
+
+import inflection
+import numpy as np
+import torch
+from collections import OrderedDict
+from joblib import Parallel, delayed
+
+import pipelines
+import wrench.endmodel as endmodel
+import wrench.labelmodel as labelmodel
+from wrench._logging import LoggingHandler
+from wrench.dataset import load_dataset
+from wrench.evaluation import AverageMeter
+import warnings
+
+from util import *
+
+# datasets = ['youtube', 'trec', 'cdr', 'chemprot', 'imdb', 'yelp', 'agnews', 'sms', 'semeval', 'amazon-high-card', 'banking-high-card']
+# for data in datasets:
+#     train_data, valid_data, test_data = load_dataset("./weak_datasets", data)
+#     # train_data, valid_data, test_data = load_dataset("./weak_datasets", data,  extract_feature=True,
+#     #                                                extract_fn="bert",
+#     #                                                cache_name="bert", model_name="bert-base-cased")
+#     result = train_data.summary()
+#     with open("./summary.txt", "a") as outfile:
+#         outfile.write(data + "\n")
+#         outfile.write(str(result) + "\n\n") 
+#     torch.cuda.empty_cache()
+
+bankings = ['amazon-high-card', 'banking-high-card']
+
+for data in bankings:
+    train_data, valid_data, test_data = load_dataset("./weak_datasets", data)
+    result = test_data.summary()
+    with open("./summary.txt", "a") as outfile:
+        outfile.write(data + " test\n")
+        outfile.write(str(result) + "\n\n") 
