@@ -125,12 +125,20 @@ if __name__ == "__main__":
         jobs = 1
     else:
         jobs = args.jobs
-
-    filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.hard_label)
+        
+    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.hard_label)
+    
+    if args.end_model_name is not None:
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.hard_label)
+    else:
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.hard_label)
+        
     model_path = f"./models/{filename}.pt"
 
     # automatically selects max tokens for the given dataset - change token_dict as necessary
     max_tokens = token_dict[args.data] if args.data in token_dict else 512
+    
+    print("max tokens: {}".format(max_tokens))
 
     lm_search_space = json.load(open("model_search_space/{}.json".format(args.label_model)))
 
@@ -223,6 +231,7 @@ if __name__ == "__main__":
         tuned_em_meter_val = AverageMeter(names=[target])
         tuned_em_meter_test = AverageMeter(names=[target])
 
+        #loop over the number of runs
         result = Parallel(n_jobs=jobs, backend="loky")(delayed(
             pipeline_loader)(
             pipeline=pipeline,
