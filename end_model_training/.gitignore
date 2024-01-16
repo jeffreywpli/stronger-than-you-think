@@ -1,0 +1,15 @@
+venv/
+
+weak_datasets/
+
+newdatasets/
+
+__pycache__/
+
+error/
+
+experiment/
+
+*.sh
+
+models/
