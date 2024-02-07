@@ -80,7 +80,6 @@ if __name__ == "__main__":
     parser.add_argument("-vnpc", "--val-number-per-class", help="number of validation data used per dataset class", 
                         default=None)
 
-
     parser.add_argument("-gs", "--grid-size",
                         help="Maximum size of the grid search for each experiment (default: 1000)",
                         type=int, default=1000)
