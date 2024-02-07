@@ -50,7 +50,6 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
 
     if indep_var is not None:
         val_data = val_data.sample(indep_var)  # indep var = val size percentage
-
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 

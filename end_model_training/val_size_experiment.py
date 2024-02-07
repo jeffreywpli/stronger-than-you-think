@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument("-nr", "--num-runs", help="Number of runs for each experiment (default: 5)", type=int,
                         default=5)
 
-    parser.add_argument("--vnpc", "--val-number-per-class" help="number of validation data used per dataset class", 
+    parser.add_argument("-vnpc", "--val-number-per-class", help="number of validation data used per dataset class", 
                         default=None)
 
 
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     elif args.pipeline == "end-to-end":
         pipeline = pipelines.train_weak
         if args.val_number_per_class is not None:
-            indep_vars = [args.val_number_per_class * val_data.n_class]
+            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
         else:
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     elif args.pipeline == "fine-tune-on-val":
         pipeline = pipelines.fine_tune_on_val
         if args.val_number_per_class is not None:
-            indep_vars = [args.val_number_per_class * val_data.n_class]
+            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
         else:
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
