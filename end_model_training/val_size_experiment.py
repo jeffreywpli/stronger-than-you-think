@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--pipeline", help="Pipeline to run (default: end-to-end)", default="end-to-end")
 
     parser.add_argument("-r", "--root", help="Directory root storing all the datasets (default: ./)",
-                        default="./weak_datasets")
+                        default="../../../weak_datasets")
 
     parser.add_argument("-j", "--jobs", help="Number of jobs to distribute experiments across (default: 1)", type=int,
                         default=1)

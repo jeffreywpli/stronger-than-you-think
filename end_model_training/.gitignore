@@ -13,3 +13,5 @@ experiment/
 *.sh
 
 models/
+
+hyakcommand.txt
