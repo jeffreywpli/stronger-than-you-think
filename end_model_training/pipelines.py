@@ -83,6 +83,8 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
     if end_model_class == Cosine:
         end_model_search = end_model_class(backbone=bb, max_tokens=max_tokens)
         em_search_space["backbone"] = [bb]
+    elif end_model_class == MLPModel:
+        end_model_search = end_model_class()
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
