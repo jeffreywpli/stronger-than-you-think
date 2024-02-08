@@ -7,6 +7,7 @@ from snorkel.utils import probs_to_preds
 from wrench._logging import LoggingHandler
 from wrench.search import grid_search
 from wrench.endmodel import Cosine
+from wrench.endmodel import MLPModel
 from wrench.labelmodel import FlyingSquid
 from util import get_filename, has_saturated
 import wrench.labelmodel as labelmodel
