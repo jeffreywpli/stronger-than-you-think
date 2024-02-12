@@ -231,10 +231,13 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
-    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
-    val_val_data.n_class = val_data.n_class
+    # val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
+    # val_val_data.n_class = val_data.n_class
 
-    end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
+    # end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
+    #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
+
+    end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
 
     val_em_val_score = end_model.test(val_data, target)
