@@ -14,6 +14,7 @@ import wrench.labelmodel as labelmodel
 import wrench.endmodel as endmodel
 import json
 import os
+import random
 
 
 #### Just some code to print debug information to stdout

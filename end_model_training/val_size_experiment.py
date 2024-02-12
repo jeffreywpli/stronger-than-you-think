@@ -22,6 +22,7 @@ from wrench._logging import LoggingHandler
 from wrench.dataset import load_dataset
 from wrench.evaluation import AverageMeter
 import warnings
+import random
 
 from util import *
 
