@@ -28,6 +28,9 @@ from util import *
 torch.backends.cudnn.deterministic = True
 
 #### Just some code to print debug information to stdout
+seed = 41
+random.seed(seed)
+np.random.seed(seed)
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO,

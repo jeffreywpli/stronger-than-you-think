@@ -50,7 +50,7 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
     """
 
     if indep_var is not None:
-        val_data = val_data.sample(indep_var)  # indep var = val size percentage
+        val_data = val_data.sample(indep_var, seed = seed)  # indep var = val size percentage
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 
@@ -120,11 +120,11 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split,
         partitions the validation data into a training subset and a new (smaller) validation subset
         """
 
-        train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
+        train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
         val_data.n_class = val_data.n_class
 
     if indep_var is not None:
-        train_data = train_data.sample(indep_var)  # indep var = train size percentage
+        train_data = train_data.sample(indep_var, seed = seed)  # indep var = train size percentage
 
     end_model_class = getattr(endmodel, end_model)
 
@@ -174,7 +174,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     """
 
     if indep_var is not None:
-        val_data = val_data.sample(indep_var)  # indep var = val size percentage
+        val_data = val_data.sample(indep_var, seed = seed)  # indep var = val size percentage
 
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
@@ -231,7 +231,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
-    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
+    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
     val_val_data.n_class = val_data.n_class
 
     end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
