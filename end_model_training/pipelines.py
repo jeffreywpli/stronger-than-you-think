@@ -114,19 +114,19 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
 def train_strong(end_model, train_data, val_data, test_data, train_val_split,
                  target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, bb,
                  max_tokens, indep_var, device="cuda", *args, **kwargs):
-
-    if train_data is None:
-        """ 
+    """ 
         if training data is not given, 
         partitions the validation data into a training subset and a new (smaller) validation subset
-        """
-
+    """
+    if train_data is None:
+        if indep_var is not None:
+            val_data = val_data.sample(indep_var, seed = seed)
         train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
         val_data.n_class = val_data.n_class
-
-    if indep_var is not None:
-        train_data = train_data.sample(indep_var, seed = seed)  # indep var = train size percentage
-
+    elif indep_var is not None:
+        train_data = train_data.sample(indep_var, seed = seed)  # indep var = train size percentage 
+    
+    
     end_model_class = getattr(endmodel, end_model)
 
     """ end model hyperparameter search and training """
@@ -232,14 +232,14 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
-    # val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
-    # val_val_data.n_class = val_data.n_class
+    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
+    val_val_data.n_class = val_data.n_class
 
-    # end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
-    #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
-
-    end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
+    end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
+
+    # end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
+    #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
 
     val_em_val_score = end_model.test(val_data, target)
     val_em_test_score = end_model.test(test_data, target)
