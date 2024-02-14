@@ -32,6 +32,7 @@ torch.backends.cudnn.deterministic = True
 seed = 41
 random.seed(seed)
 np.random.seed(seed)
+torch.manual_seed(seed)
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO,
