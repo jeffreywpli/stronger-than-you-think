@@ -33,7 +33,7 @@ target_dict = {
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
 
 
-def train_weak(label_model, end_model, train_data, val_data, test_data,
+def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
                n_steps, patience, evaluation_step, hard_label, bb, max_tokens, indep_var, device="cuda", *args,
                **kwargs):
@@ -49,9 +49,11 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
     :param device:
     :return:
     """
+    random.seed(seed)
+    np.random.seed(seed)
 
     if indep_var is not None:
-        val_data = val_data.sample(indep_var, seed = seed)  # indep var = val size percentage
+        val_data = val_data.sample(indep_var)  # indep var = val size percentage
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 
@@ -111,20 +113,24 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
             "em_val": em_val_score, "lm_val": lm_val_score}
 
 
-def train_strong(end_model, train_data, val_data, test_data, train_val_split,
+def train_strong(end_model, train_data, val_data, test_data, train_val_split, seed,
                  target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, bb,
                  max_tokens, indep_var, device="cuda", *args, **kwargs):
     """ 
         if training data is not given, 
         partitions the validation data into a training subset and a new (smaller) validation subset
     """
+
+    random.seed(seed)
+    np.random.seed(seed)
+
     if train_data is None:
         if indep_var is not None:
-            val_data = val_data.sample(indep_var, seed = seed)
-        train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
+            val_data = val_data.sample(indep_var)
+        train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_data.n_class = val_data.n_class
     elif indep_var is not None:
-        train_data = train_data.sample(indep_var, seed = seed)  # indep var = train size percentage 
+        train_data = train_data.sample(indep_var)  # indep var = train size percentage 
     
     
     end_model_class = getattr(endmodel, end_model)
@@ -158,7 +164,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split,
 
 
 def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, train_val_split,
-               target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
+               target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials, seed,
                n_steps, patience, evaluation_step, hard_label, bb, max_tokens, indep_var, model_path, device="cuda", *args,
                **kwargs):
     """
@@ -174,8 +180,11 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     :return:
     """
 
+    random.seed(seed)
+    np.random.seed(seed)
+
     if indep_var is not None:
-        val_data = val_data.sample(indep_var, seed = seed)  # indep var = val size percentage
+        val_data = val_data.sample(indep_var)  # indep var = val size percentage
 
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
@@ -232,7 +241,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
-    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False, seed = seed))
+    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
     val_val_data.n_class = val_data.n_class
 
     end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
