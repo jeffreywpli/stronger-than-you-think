@@ -1,0 +1,16 @@
+{
+  "lr": [
+    2e-05,
+    3e-05,
+    5e-05
+  ],
+  "l2": [
+    1e-4
+  ],
+  "batch_size": [
+    32
+  ],
+  "model_name": [
+    "roberta-base"
+  ]
+}
