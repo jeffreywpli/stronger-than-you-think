@@ -7,12 +7,14 @@ from snorkel.utils import probs_to_preds
 from wrench._logging import LoggingHandler
 from wrench.search import grid_search
 from wrench.endmodel import Cosine
+from wrench.endmodel import MLPModel
 from wrench.labelmodel import FlyingSquid
 from util import get_filename, has_saturated
 import wrench.labelmodel as labelmodel
 import wrench.endmodel as endmodel
 import json
 import os
+import random
 
 
 #### Just some code to print debug information to stdout
@@ -31,7 +33,7 @@ target_dict = {
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
 
 
-def train_weak(label_model, end_model, train_data, val_data, test_data,
+def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
                n_steps, patience, evaluation_step, hard_label, bb, max_tokens, indep_var, device="cuda", *args,
                **kwargs):
@@ -47,10 +49,11 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
     :param device:
     :return:
     """
+    random.seed(seed)
+    np.random.seed(seed)
 
     if indep_var is not None:
         val_data = val_data.sample(indep_var)  # indep var = val size percentage
-
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 
@@ -83,6 +86,8 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
     if end_model_class == Cosine:
         end_model_search = end_model_class(backbone=bb, max_tokens=max_tokens)
         em_search_space["backbone"] = [bb]
+    elif end_model_class == MLPModel:
+        end_model_search = end_model_class()
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
@@ -108,28 +113,34 @@ def train_weak(label_model, end_model, train_data, val_data, test_data,
             "em_val": em_val_score, "lm_val": lm_val_score}
 
 
-def train_strong(end_model, train_data, val_data, test_data, train_val_split,
+def train_strong(end_model, train_data, val_data, test_data, train_val_split, seed,
                  target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, bb,
                  max_tokens, indep_var, device="cuda", *args, **kwargs):
-
-    if train_data is None:
-        """ 
+    """ 
         if training data is not given, 
         partitions the validation data into a training subset and a new (smaller) validation subset
-        """
+    """
 
+    random.seed(seed)
+    np.random.seed(seed)
+
+    if train_data is None:
+        if indep_var is not None:
+            val_data = val_data.sample(indep_var)
         train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_data.n_class = val_data.n_class
-
-    if indep_var is not None:
-        train_data = train_data.sample(indep_var)  # indep var = train size percentage
-
+    elif indep_var is not None:
+        train_data = train_data.sample(indep_var)  # indep var = train size percentage 
+    
+    
     end_model_class = getattr(endmodel, end_model)
 
     """ end model hyperparameter search and training """
     if end_model_class == Cosine:
         end_model_search = end_model_class(backbone=bb, max_tokens=max_tokens)
         em_search_space["backbone"] = [bb]
+    elif end_model_class == MLPModel:
+        end_model_search = end_model_class()
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
@@ -153,7 +164,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split,
 
 
 def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, train_val_split,
-               target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
+               target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials, seed,
                n_steps, patience, evaluation_step, hard_label, bb, max_tokens, indep_var, model_path, device="cuda", *args,
                **kwargs):
     """
@@ -168,6 +179,9 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     :param device:
     :return:
     """
+
+    random.seed(seed)
+    np.random.seed(seed)
 
     if indep_var is not None:
         val_data = val_data.sample(indep_var)  # indep var = val size percentage
@@ -232,6 +246,9 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
 
     end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
+
+    # end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
+    #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
 
     val_em_val_score = end_model.test(val_data, target)
     val_em_test_score = end_model.test(test_data, target)

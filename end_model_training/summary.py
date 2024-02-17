@@ -37,11 +37,12 @@ from util import *
 #         outfile.write(str(result) + "\n\n") 
 #     torch.cuda.empty_cache()
 
-bankings = ['amazon-high-card', 'banking-high-card']
+sizecount = ['semeval', 'agnews']
 
-for data in bankings:
+for data in sizecount:
     train_data, valid_data, test_data = load_dataset("./weak_datasets", data)
-    result = test_data.summary()
     with open("./summary.txt", "a") as outfile:
-        outfile.write(data + " test\n")
-        outfile.write(str(result) + "\n\n") 
+        # outfile.write(data + " test\n")
+        # outfile.write(str(result) + "\n\n") 
+        outfile.write(data + "\n")
+        outfile.write("train: {}, val: {}, test: {} \n".format(len(train_data), len(valid_data), len(test_data)) )

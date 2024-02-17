@@ -22,12 +22,17 @@ from wrench._logging import LoggingHandler
 from wrench.dataset import load_dataset
 from wrench.evaluation import AverageMeter
 import warnings
+import random
 
 from util import *
 
 torch.backends.cudnn.deterministic = True
 
 #### Just some code to print debug information to stdout
+seed = 41
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO,
@@ -77,6 +82,9 @@ if __name__ == "__main__":
     parser.add_argument("-nr", "--num-runs", help="Number of runs for each experiment (default: 5)", type=int,
                         default=5)
 
+    parser.add_argument("-vnpc", "--val-number-per-class", help="number of validation data used per dataset class", 
+                        default=None)
+
     parser.add_argument("-gs", "--grid-size",
                         help="Maximum size of the grid search for each experiment (default: 1000)",
                         type=int, default=1000)
@@ -115,6 +123,8 @@ if __name__ == "__main__":
     parser.add_argument("--train-val-split", type=float, default=0.8)
 
     parser.add_argument("--debug", help="Enable debug mode.", action="store_true")
+
+    
 
     # handles CTRL^C signal interruption to terminate the program
     signal.signal(signal.SIGINT, signal_handler)
@@ -184,12 +194,18 @@ if __name__ == "__main__":
         max_iter = 1
     elif args.pipeline == "end-to-end":
         pipeline = pipelines.train_weak
-        indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
+        if args.val_number_per_class is not None:
+            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
+        else:
+            indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
     elif args.pipeline == "val-as-train":
         pipeline = pipelines.train_strong
         train_data = None
-        indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
+        if args.val_number_per_class is not None:
+            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
+        else:
+            indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
     elif args.pipeline == "train-as-train":
         pipeline = pipelines.train_strong
@@ -209,7 +225,10 @@ if __name__ == "__main__":
             oracle_results = json.load(file)["em_test"][target]
     elif args.pipeline == "fine-tune-on-val":
         pipeline = pipelines.fine_tune_on_val
-        indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
+        if args.val_number_per_class is not None:
+            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
+        else:
+            indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
     else:
         raise NotImplementedError
