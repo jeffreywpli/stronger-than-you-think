@@ -113,6 +113,7 @@ if __name__ == "__main__":
                         action='store_true')
     
     #TODO add option for not doing hyperparam tuning
+    parser.add_argument("-fix", "--fix-hyperparam", help="fix hyperparam for end model (default: False)",action='store_true')
 
     parser.add_argument("-bb", "--backbone", help="backbone for the end model (default: BERT)", default="BERT")
 
@@ -141,12 +142,12 @@ if __name__ == "__main__":
     else:
         jobs = args.jobs
         
-    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label)
+    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
     
     if args.end_model_name is not None:
-        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label)
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
     else:
-        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label)
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
         
     model_path = f"./models/{filename}.pt"
 
@@ -280,6 +281,7 @@ if __name__ == "__main__":
             # TODO pass arguement to fix hyperparam
             # TODO whether perfrom 
             hard_label=args.hard_label,
+            fix_hyperparam=args.fix_hyperparam,
             bb=args.backbone,
             max_tokens=max_tokens,
             indep_var=indep_var,
