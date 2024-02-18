@@ -67,7 +67,7 @@ def custom_stratified_sample(dataset, n_samples_per_class, return_dataset=True):
 
 def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
-               n_steps, patience, evaluation_step, stratified, hard_label, bb, max_tokens, indep_var, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, bb, max_tokens, indep_var, device="cuda", *args,
                **kwargs):
     """
 
@@ -154,7 +154,11 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     end_model = end_model_class(**end_model_searched_params)
 
     # TODO if used fixed hyperparam set  n_step = 6000
-    end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
+    if fix_hyperparam:
+        end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
+                  evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_hyperparam)
+    else:
+        end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
                   n_steps=n_steps)
 
@@ -207,7 +211,9 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
         train_data = train_data.sample(indep_var)  # indep var = train size percentage 
     
     #TODO check how to not to perform early stopping
+    
     #TODO based on the fixed flag, do or not do train, val split
+    
     end_model_class = getattr(endmodel, end_model)
 
     """ end model hyperparameter search and training """

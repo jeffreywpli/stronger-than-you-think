@@ -113,7 +113,7 @@ if __name__ == "__main__":
                         action='store_true')
     
     #TODO add option for not doing hyperparam tuning
-    parser.add_argument("-fix", "--fix-hyperparam", help="fix hyperparam for end model (default: False)",action='store_true')
+    parser.add_argument("-fix", "--fix-hyperparam", help="Number of step size (Default = None)",type=int, default=None)
 
     parser.add_argument("-bb", "--backbone", help="backbone for the end model (default: BERT)", default="BERT")
 
