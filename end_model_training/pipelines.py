@@ -44,20 +44,21 @@ def custom_stratified_sample(dataset, n_samples_per_class, return_dataset=True):
     """
     unique_labels = np.unique(dataset.labels)
     sampled_indices = []
-    percent = 1
-    if isinstance(n_samples_per_class, float):
-        percent = n_samples_per_class
+    
     for label in unique_labels:
         class_indices = np.where(dataset.labels == label)[0]
         # get the number of samples to draw from this class, if n_samples_per_class is a float then percent is 1 by default TODO (check my logic is correct here)
         
-        n_samples_per_class = int(len(class_indices) * percent)
+        # if a float is passed, in get the percent of that label, and at least one.
+    
+        if isinstance(n_samples_per_class, float):
+            n_samples_per_class = min(1, int(len(class_indices) * num_classes))
+
         if len(class_indices) < n_samples_per_class:
             # If class size is smaller, allow replacement to meet the sample size requirement
             sampled_indices.extend(np.random.choice(class_indices, n_samples_per_class, replace=True))
         else:
             sampled_indices.extend(np.random.choice(class_indices, n_samples_per_class, replace=False))
-
     if return_dataset:
         # Use the collected indices to create a subset of the dataset
         return dataset.create_subset(sampled_indices)
@@ -94,19 +95,19 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
 #     else:
 #         return list(idx)
 
-
     # TODO
     # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
+    # Now also takes a float
     if indep_var is not None and stratified:
         if not isinstance(indep_var, float):
-            number_for_each_class = int(indep_var / val_data.n_class)
+            number_for_each_class = indep_var // val_data.n_class
         else:
             number_for_each_class = indep_var 
-        val_data = val_data.custom_stratified_sample(number_for_each_class)
-    
+        val_data = custom_stratified_sample(val_data, number_for_each_class)
     elif indep_var is not None:
         val_data = val_data.sample(indep_var) # indep var = val size percentage
     
+
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 
@@ -184,31 +185,30 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     np.random.seed(seed)
 
     # TODO check if stratfied, and perform different sampling
-    
-    
-
-    
-    if train_data is None:    # TODO
+    # in case of training data is None, we use validation data as training data
+    if train_data is None: # TODO
     # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
         if indep_var is not None and stratified:
             if not isinstance(indep_var, float):
-                number_for_each_class = int(indep_var / val_data.n_class)
+                number_for_each_class = indep_var // val_data.n_class
             else:
                 number_for_each_class = indep_var 
-            val_data = val_data.custom_stratified_sample(number_for_each_class)
+            val_data = custom_stratified_sample(val_data, number_for_each_class)
         elif indep_var is not None:
-            val_data = val_data.sample(indep_var)
+            val_data = val_data.sample(indep_var) # indep var = val size percentage
         train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
-        val_data.n_class = val_data.n_class
+        val_data.n_class = val_data.n_class   
     # TODO: Check correctness here
     elif indep_var is not None and stratified:
         if not isinstance(indep_var, float):
-            number_for_each_class = int(indep_var / val_data.n_class)
+            number_for_each_class = indep_var // val_data.n_class
         else:
             number_for_each_class = indep_var 
-        val_data = val_data.custom_stratified_sample(number_for_each_class)
+        train_data = custom_stratified_sample(train, number_for_each_class)
     elif indep_var is not None:
-        train_data = train_data.sample(indep_var)  # indep var = train size percentage 
+        val_data = val_data.sample(indep_var) # indep var = val size percentage
+    elif indep_var is not None:
+        train_data = train_data.sample(indep_var)  indep var = train size percentage 
     
     #TODO check how to not to perform early stopping
     
@@ -269,13 +269,13 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     # if is int
     if indep_var is not None and stratified:
         if not isinstance(indep_var, float):
-            number_for_each_class = int(indep_var / val_data.n_class)
+            number_for_each_class = indep_var // val_data.n_class
         else:
             number_for_each_class = indep_var 
-        val_data = val_data.custom_stratified_sample(number_for_each_class)
+        val_data = custom_stratified_sample(val_data, number_for_each_class)
     elif indep_var is not None:
-        val_data = val_data.sample(indep_var)  # indep var = val size percentage
-
+        val_data = val_data.sample(indep_var) # indep var = val size percentage
+    
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 
