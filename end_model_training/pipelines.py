@@ -52,7 +52,7 @@ def custom_stratified_sample(dataset, n_samples_per_class, return_dataset=True):
         # if a float is passed, in get the percent of that label, and at least one.
     
         if isinstance(n_samples_per_class, float):
-            n_samples_per_class = min(1, int(len(class_indices) * num_classes))
+            n_samples_per_class = np.min(1, int(len(class_indices) * num_classes))
 
         if len(class_indices) < n_samples_per_class:
             # If class size is smaller, allow replacement to meet the sample size requirement
