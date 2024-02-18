@@ -51,9 +51,9 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     """
     random.seed(seed)
     np.random.seed(seed)
-
+    # TODO check if stratfied, and perform different sampling
     if indep_var is not None:
-        val_data = val_data.sample(indep_var)  # indep var = val size percentage
+        val_data = val_data.sample(indep_var) # indep var = val size percentage
     label_model_class = getattr(labelmodel, label_model)
     end_model_class = getattr(endmodel, end_model)
 
@@ -99,6 +99,8 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                                             patience=patience, evaluation_step=evaluation_step, device=device)
 
     end_model = end_model_class(**end_model_searched_params)
+
+    # TODO if used fixed hyperparam set  n_step = 6000
     end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
                   n_steps=n_steps)
@@ -124,6 +126,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     random.seed(seed)
     np.random.seed(seed)
 
+    # TODO check if stratfied, and perform different sampling
     if train_data is None:
         if indep_var is not None:
             val_data = val_data.sample(indep_var)
@@ -132,7 +135,8 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     elif indep_var is not None:
         train_data = train_data.sample(indep_var)  # indep var = train size percentage 
     
-    
+    #TODO check how to not to perform early stopping
+    #TODO based on the fixed flag, do or not do train, val split
     end_model_class = getattr(endmodel, end_model)
 
     """ end model hyperparameter search and training """
@@ -183,6 +187,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     random.seed(seed)
     np.random.seed(seed)
 
+    # TODO check if stratfied, and perform different sampling
     if indep_var is not None:
         val_data = val_data.sample(indep_var)  # indep var = val size percentage
 
@@ -241,9 +246,12 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
+    # TODO check how to not to perform early stopping
+    # TODO based on the fixed flag, do or not do train, val split
     val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
     val_val_data.n_class = val_data.n_class
 
+    # TODO if used fixed hyperparam set  n_step = 6000
     end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
 

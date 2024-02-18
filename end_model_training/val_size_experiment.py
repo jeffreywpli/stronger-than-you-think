@@ -106,8 +106,11 @@ if __name__ == "__main__":
 
     parser.add_argument("--device", help="Device to run discriminative model on (default: cuda)", default='cuda')
 
+    # TODO add arguement ...
     parser.add_argument("-hl", "--hard-label", help="use hard label for label model (default: False)",
                         action='store_true')
+    
+    #TODO add option for not doing hyperparam tuning
 
     parser.add_argument("-bb", "--backbone", help="backbone for the end model (default: BERT)", default="BERT")
 
@@ -271,6 +274,9 @@ if __name__ == "__main__":
             patience=args.patience,
             evaluation_step=args.evaluation_step,
             device=args.device,
+            # TODO pass arguement to pipeline
+            # TODO pass arguement to fix hyperparam
+            # TODO whether perfrom 
             hard_label=args.hard_label,
             bb=args.backbone,
             max_tokens=max_tokens,
