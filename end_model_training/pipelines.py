@@ -35,7 +35,7 @@ data_to_target = {data: metric for metric, datasets in target_dict.items() for d
 
 def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
-               n_steps, patience, evaluation_step, hard_label, bb, max_tokens, indep_var, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, bb, max_tokens, indep_var, device="cuda", *args,
                **kwargs):
     """
 
@@ -52,6 +52,11 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     random.seed(seed)
     np.random.seed(seed)
     # TODO check if stratfied, and perform different sampling
+    if indep_var is not None and stratified:
+        number_for_each_class = int(indep_var / val_data.n_class)
+        
+        val_data = val_data.sample(indep_var)
+    
     if indep_var is not None:
         val_data = val_data.sample(indep_var) # indep var = val size percentage
     label_model_class = getattr(labelmodel, label_model)

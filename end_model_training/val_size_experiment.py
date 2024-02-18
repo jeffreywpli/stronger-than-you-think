@@ -107,6 +107,8 @@ if __name__ == "__main__":
     parser.add_argument("--device", help="Device to run discriminative model on (default: cuda)", default='cuda')
 
     # TODO add arguement ...
+    parser.add_argument("-stra", "--stratified", help="The number of elements for each class is set specifically to the number given (default: False)", action='store_true')
+    
     parser.add_argument("-hl", "--hard-label", help="use hard label for label model (default: False)",
                         action='store_true')
     
@@ -139,12 +141,12 @@ if __name__ == "__main__":
     else:
         jobs = args.jobs
         
-    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.hard_label)
+    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label)
     
     if args.end_model_name is not None:
-        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.hard_label)
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label)
     else:
-        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.hard_label)
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label)
         
     model_path = f"./models/{filename}.pt"
 
@@ -221,9 +223,8 @@ if __name__ == "__main__":
         indep_vars = [(max + min) / 2]
         max_iter = args.max_iter
 
-        saturate_filename = get_filename(args.data, args.saturate, args.label_model, args.end_model, args.backbone,
-                                         args.hard_label)
-
+        saturate_filename = get_filename(args.data, args.saturate, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label)
+        
         with open("./results/{}/{}.json".format(args.data, saturate_filename), "r") as file:
             oracle_results = json.load(file)["em_test"][target]
     elif args.pipeline == "fine-tune-on-val":
@@ -275,6 +276,7 @@ if __name__ == "__main__":
             evaluation_step=args.evaluation_step,
             device=args.device,
             # TODO pass arguement to pipeline
+            stratified=args.stratified,
             # TODO pass arguement to fix hyperparam
             # TODO whether perfrom 
             hard_label=args.hard_label,
