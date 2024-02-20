@@ -157,7 +157,7 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     # TODO if used fixed hyperparam set  n_step = 6000
     if fix_hyperparam:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
-                  evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_hyperparam)
+                  evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam)
     else:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
@@ -196,8 +196,9 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
             val_data = custom_stratified_sample(val_data, number_for_each_class)
         elif indep_var is not None:
             val_data = val_data.sample(indep_var) # indep var = val size percentage
-        train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
-        val_data.n_class = val_data.n_class   
+        if not fix_hyperparam:
+            train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
+            val_data.n_class = val_data.n_class   
     # TODO: Check correctness here
     elif indep_var is not None and stratified:
         if not isinstance(indep_var, float):
@@ -208,7 +209,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     elif indep_var is not None:
         val_data = val_data.sample(indep_var) # indep var = val size percentage
     elif indep_var is not None:
-        train_data = train_data.sample(indep_var)  indep var = train size percentage 
+        train_data = train_data.sample(indep_var)  # indep var = train size percentage 
     
     #TODO check how to not to perform early stopping
     
@@ -233,7 +234,12 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                                             evaluation_step=evaluation_step, device=device)
 
     end_model = end_model_class(**end_model_searched_params)
-    end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
+
+    if fix_hyperparam:
+        end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
+                evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam)
+    else:
+        end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps)
 
     em_val_score = end_model.test(val_data, target)
@@ -333,13 +339,18 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
 
     # TODO check how to not to perform early stopping
     # TODO based on the fixed flag, do or not do train, val split
-    val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
-    val_val_data.n_class = val_data.n_class
+    if not fixed_hyperparam:
+        val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
+        val_val_data.n_class = val_data.n_class
 
-    # TODO if used fixed hyperparam set  n_step = 6000
-    end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
-                  evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
-
+        # TODO if used fixed hyperparam set  n_step = 6000
+        end_model.fit(dataset_train=val_train_data, dataset_valid=val_val_data,  y_train=np.array(val_train_data.labels),
+                    evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
+    else:
+        end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
+                    evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=hyperparam, pretrained_model = model_path)
+   
+        
     # end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
     #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
 
