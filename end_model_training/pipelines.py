@@ -332,7 +332,6 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                                                 patience=patience, evaluation_step=evaluation_step, device=device)
         end_model = end_model_class(**end_model_searched_params)
     else:
-        
         end_model = end_model_class(**em_search_space)
 
     end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
