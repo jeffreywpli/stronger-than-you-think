@@ -29,7 +29,7 @@ from util import *
 torch.backends.cudnn.deterministic = True
 
 #### Just some code to print debug information to stdout
-seed = 41
+seed = 3407
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
@@ -285,7 +285,7 @@ if __name__ == "__main__":
             bb=args.backbone,
             max_tokens=max_tokens,
             indep_var=indep_var,
-            seed=run_id,
+            seed=run_id + 42,
             model_path=model_path
         ) for run_id in range(1, args.num_runs + 1))
 
