@@ -29,7 +29,7 @@ from util import *
 torch.backends.cudnn.deterministic = True
 
 #### Just some code to print debug information to stdout
-seed = 41
+seed = 3407
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
