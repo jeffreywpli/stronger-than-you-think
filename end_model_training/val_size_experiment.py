@@ -129,7 +129,6 @@ if __name__ == "__main__":
     parser.add_argument("--train-val-split", type=float, default=0.8)
 
     parser.add_argument("--debug", help="Enable debug mode.", action="store_true")
-
     
 
     # handles CTRL^C signal interruption to terminate the program
@@ -191,6 +190,7 @@ if __name__ == "__main__":
 
     num_classes = train_data.n_class
     min, max = 0, 0
+    experiment_flag = False
 
     results = OrderedDict()
     
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     elif args.pipeline == "end-to-end":
         pipeline = pipelines.train_weak
         if args.val_number_per_class is not None:
-            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
+            indep_vars = [int(args.val_number_per_class) * num_classes]
         else:
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
         pipeline = pipelines.train_strong
         train_data = None
         if args.val_number_per_class is not None:
-            indep_vars = [int(args.val_number_per_class) * val_data.n_class]
+            indep_vars = [int(args.val_number_per_class) * num_classes]
         else:
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
@@ -225,7 +225,7 @@ if __name__ == "__main__":
         max_iter = args.max_iter
 
         saturate_filename = get_filename(args.data, args.saturate, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label)
-        
+
         with open("./results/{}/{}.json".format(args.data, saturate_filename), "r") as file:
             oracle_results = json.load(file)["em_test"][target]
     elif args.pipeline == "fine-tune-on-val":
@@ -235,6 +235,15 @@ if __name__ == "__main__":
         else:
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
+    elif args.pipeline =="testing":
+        pipeline = pipelines.train_strong
+        if args.val_number_per_class is not None:
+            indep_vars = [int(args.val_number_per_class) * num_classes]
+        else:
+            indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
+        max_iter = len(indep_vars)
+        experiment_flag = True
+        #debugging experiment to run test with
     else:
         raise NotImplementedError
 
@@ -286,7 +295,8 @@ if __name__ == "__main__":
             max_tokens=max_tokens,
             indep_var=indep_var,
             seed=run_id,
-            model_path=model_path
+            model_path=model_path,
+            experiment_flag=experiment_flag
         ) for run_id in range(1, args.num_runs + 1))
 
         for run in result:
