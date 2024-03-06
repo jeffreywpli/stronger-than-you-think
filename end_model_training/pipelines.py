@@ -223,6 +223,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
+    #TODO fix
     if not fix_hyperparam:
         end_model_searched_params = grid_search(end_model_search, dataset_train=train_data,
                                                 y_train=np.array(train_data.labels),
@@ -235,9 +236,10 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     else:
         end_model = end_model_class(**em_search_space)
 
+    #TODO change this to fix step size
     if fix_hyperparam:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam)
+                evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_hyperparam)
     else:
         end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps)
@@ -313,6 +315,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
+    #TODO
     if not fix_hyperparam:
         end_model_searched_params = grid_search(end_model_search, dataset_train=covered_train_data, y_train=weak_labels,
                                                 dataset_valid=val_data, metric=target, direction='auto',
@@ -337,7 +340,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
 
     # TODO check how to not to perform early stopping
     # TODO based on the fixed flag, do or not do train, val split
-    # TODO check this
+    # TODO check this from above for early stopping
     if not fix_hyperparam:
         val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_val_data.n_class = val_data.n_class
