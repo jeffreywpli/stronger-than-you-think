@@ -60,6 +60,8 @@ class BertClassifierModel(BaseTorchClassModel):
             tolerance: Optional[float] = -1.0,
             device: Optional[torch.device] = None,
             verbose: Optional[bool] = True,
+            pretrained_model: Optional[str] = None,
+            to_save: Optional[str] = None,
             **kwargs: Any):
 
         if not verbose:
@@ -90,6 +92,9 @@ class BertClassifierModel(BaseTorchClassModel):
             **hyperparas
         ).to(device)
         self.model = model
+        
+        if pretrained_model is not None:
+            self.model.load_state_dict(torch.load(pretrained_model))
 
         optimizer = AdamW(model.parameters(), lr=hyperparas['lr'], weight_decay=hyperparas['l2'])
 
@@ -143,10 +148,11 @@ class BertClassifierModel(BaseTorchClassModel):
 
                         if step >= n_steps:
                             break
-
         except KeyboardInterrupt:
             logger.info(f'KeyboardInterrupt! do not terminate the process in case need to save the best model')
 
         self._finalize()
 
+        if to_save is not None:
+            torch.save(self.model.state_dict(), to_save)
         return history
