@@ -147,7 +147,8 @@ if __name__ == "__main__":
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
     else:
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
-        
+    if not os.path.exists("./models"):
+        os.mkdir("./models")
     model_path = f"./models/{filename}.pt"
 
     # automatically selects max tokens for the given dataset - change token_dict as necessary
