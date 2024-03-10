@@ -87,19 +87,6 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     random.seed(seed)
     np.random.seed(seed)
     
-    
-# def sample(self, alpha: Union[int, float], return_dataset=True):
-#     if isinstance(alpha, float):
-#         alpha = int(len(self) * alpha)
-#     idx = np.random.choice(len(self), alpha, replace=False)
-#     if return_dataset:
-#         return self.create_subset(idx)
-#     else:
-#         return list(idx)
-
-    # TODO
-    # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
-    # Now also takes a float
     if indep_var is not None and stratified:
         val_data = custom_stratified_sample(val_data, indep_var)
     elif indep_var is not None:
@@ -272,9 +259,6 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     random.seed(seed)
     np.random.seed(seed)
     
-    # TODO
-    # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
-    # if is int
     if indep_var is not None and stratified:
         val_data = custom_stratified_sample(val_data, indep_var)
     elif indep_var is not None:
@@ -341,6 +325,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     # TODO check how to not to perform early stopping
     # TODO based on the fixed flag, do or not do train, val split
     # TODO check this from above for early stopping
+    
     if not fix_hyperparam:
         val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_val_data.n_class = val_data.n_class
