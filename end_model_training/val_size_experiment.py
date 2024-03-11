@@ -111,16 +111,16 @@ if __name__ == "__main__":
     parser.add_argument("-hl", "--hard-label", help="use hard label for label model (default: False)",
                         action='store_true')
     
-    parser.add_argument("-fixHyper", "--fix-hyperparam", help="use fixed hyperparameter (default: False)", action='store_true')
+    parser.add_argument("-fixHyper", "--fix-hyperparam", help="Use fixed hyperparameter (default: False)", action='store_true')
     
     parser.add_argument("-fixStep", "--fix-steps", help="Number of step size (Default = None)",type=int, default=None)
     
-    parser.add_argument("-bb", "--backbone", help="backbone for the end model (default: BERT)", default="BERT")
+    parser.add_argument("-bb", "--backbone", help="Backbone for the end model (default: BERT)", default="BERT")
 
-    parser.add_argument("-emn", "--end-model-name", help="name for specific end model type eg. (Roberta for BERT)", default=None)
+    parser.add_argument("-emn", "--end-model-name", help="Name for specific end model type eg. (Roberta for BERT)", default=None)
 
     parser.add_argument("-sat", "--saturate",
-                        help="results with respect to which to measure the saturation point (default: oracle)",
+                        help="Results with respect to which to measure the saturation point (default: oracle)",
                         default="oracle")
 
     parser.add_argument("-m", "--max-iter", help="Maximum number of training iterations to obtain the saturation point",
@@ -161,10 +161,11 @@ if __name__ == "__main__":
 
     lm_search_space = json.load(open("model_search_space/{}.json".format(args.label_model)))
 
+    full_end_model_name = args.end_model
     if args.end_model_name is not None:
-        em_search_space = json.load(open("model_search_space/{}.json".format(args.end_model+"_"+ args.end_model_name)))
-    else:
-        em_search_space = json.load(open("model_search_space/{}.json".format(args.end_model)))
+        full_end_model_name = full_end_model_name + "_" + args.end_model_name
+
+    em_search_space = json.load(open("model_search_space/{}.json".format(full_end_model_name)))
 
     # warns the user if they're parallelizing experiments across more CPUs than available, which can lead to slowdowns
     if jobs > multiprocessing.cpu_count():

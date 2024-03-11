@@ -1,5 +1,7 @@
 # stronger-than-you-think
 
+This project focuses on idenitifying real-life datasets that weak supervision excells at. It is based on the [wrench library](https://github.com/JieyuZ2/wrench). Some of the pipeline design are consistent with paper [Weaker Than You Think: A Critical Look at Weakly Supervised Learning](https://arxiv.org/pdf/2305.17442.pdf).
+
 
 ## Installation
 
@@ -11,10 +13,6 @@ source activate stronger-than-uthink
 ```
 pip install git+https://github.com/openai/CLIP.git
 ```
-
-# End_model_training
-
-
 
 ## Structure of the project
 
@@ -56,11 +54,15 @@ The **`model_search_space`** folder stores hyperparameter search space for each 
 
 
 ## How to run experiments
-[1] Put the dataset in the `WRENCH` format. 
+[1] 
+
+Put the dataset in the `WRENCH` format. 
 
 Note that additional modifications to `WRENCH` dataset files in order to correctly import the additional dataset.
 
-[2] Add/Modify the `json` file in the **`model_search_space`** folder with corresponding parameters.
+[2] 
+
+Add/Modify the `json` file in the **`model_search_space`** folder with corresponding parameters.
 
 [3]
 
@@ -69,8 +71,24 @@ python val_size_experiment.py
 ```
 ### Major arguments
 
-`--data`, `--pipeline`, `--label-model`, `--end-model`,
-`--num-runs`
+`--data`, `--pipeline`, `--label-model`, `--end-model`, `--end-model-name`
+`--num-runs`, `--fix-hyperparam`, `--fix-steps`
+
+### Examples of codes
+
+[1]
+
+Running the continous fine tuning experiment on ChemProt dataset, on RoBERTa model, with validaton dataset size of 50 per class, fixed step size of 6000, and hyperparameter searching for the first phase.
+
+```
+python3 val_size_experiment.py -p fine-tune-on-val -d chemprot -em BertClassifierModel -emn roberta -vnpc 50 -fixStep 6000
+```
+
+[2]
+
+```
+
+```
 
 ### Note:
 [1] If running grid search with Cosine as an end model with parallelism enabled, the following combination of hyperparameters may cause GPU memory issues:

@@ -1,4 +1,6 @@
+
 # Limit of Weak Supervision
+## Please use the README.md in the maindirectory.
 
 This project is based on the wrench library. Please visit [link](https://github.com/JieyuZ2/wrench) for more detailed instructions.
 
