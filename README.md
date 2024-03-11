@@ -1,6 +1,6 @@
 # stronger-than-you-think
 
-This project focuses on idenitifying real-life datasets that weak supervision excells at. It is based on the [`WRENCH`](https://github.com/JieyuZ2/wrench). Some of the pipeline design are consistent with paper [Weaker Than You Think: A Critical Look at Weakly Supervised Learning](https://arxiv.org/pdf/2305.17442.pdf).
+This project focuses on idenitifying real-life datasets that weak supervision excells at. It is based on the [`WRENCH`](https://github.com/JieyuZ2/wrench). Some of the pipeline design are consistent with paper [*Weaker Than You Think: A Critical Look at Weakly Supervised Learning*](https://arxiv.org/pdf/2305.17442.pdf).
 
 
 ## Installation
@@ -17,6 +17,7 @@ pip install git+https://github.com/openai/CLIP.git
 ## Structure of the project
 
 ### Pipeline
+
 The **`val_size_experiment.py`** file handles the user argument of the experiments and calls corresponding pipelines in **`pipelines.py`** to run the experiments.
 
 The pipeline currently has the following experiments:
@@ -54,6 +55,7 @@ The **`model_search_space`** folder stores hyperparameter search space for each 
 
 
 ## How to run experiments
+
 [1] 
 
 Put the dataset in the `WRENCH` format. 
@@ -69,6 +71,7 @@ Add/Modify the `json` file in the **`model_search_space`** folder with correspon
 ```
 python val_size_experiment.py
 ```
+
 ### Major arguments
 
 `--data`, `--pipeline`, `--label-model`, `--end-model`, `--end-model-name`
@@ -78,7 +81,7 @@ python val_size_experiment.py
 
 [1]
 
-Running the continous fine tuning experiment on ChemProt dataset, on RoBERTa model, with validaton dataset size of 50 per class, fixed step size of 6000, and hyperparameter searching for the first phase.
+Running the continous fine-tuning experiment on ChemProt dataset, on RoBERTa model, with validaton dataset size of 50 per class, fixed step size of 6000, and hyperparameter searching for the first phase.
 
 ```
 python3 val_size_experiment.py -p fine-tune-on-val -d chemprot -em BertClassifierModel -emn roberta -vnpc 50 -fixStep 6000
@@ -92,6 +95,12 @@ python3 val_size_experiment.py -p val-as-train -d agnews -em BertClassifierModel
 ```
 
 ### Note:
-[1] If running grid search with Cosine as an end model with parallelism enabled, the following combination of hyperparameters may cause GPU memory issues:
+
+[1] 
+
+If running grid search with Cosine as an end model with parallelism enabled, the following combination of hyperparameters may cause GPU memory issues:
 {"optimizer_lr" : [1e-5], "optimizer_weight_decay" : [1e-4], "batch_size" : [32], "real_batch_size" : [8],  "teacher_update" : [100], "lambda" : [0.01] "thresh" : [0.2], "margin” : [1.0], "mu" : [1.0]}
 
+[2]
+
+The `val-as-train`, `fine-tune-on-val` pipeline are consistent with the only clean data experiment and  continous fine-tuning experiment (CFT) of the *Weaker than you think paper*. Note that the paper used fixed hyperparameter and fixed step size for some of its experiment. Thus the flags `--fix-hyperparam`, `--fix-steps` should be used. In order to the RoBERTa model, see the [example](#examples-of-codes) above.
