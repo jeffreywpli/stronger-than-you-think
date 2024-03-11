@@ -1,6 +1,6 @@
 # stronger-than-you-think
 
-This project focuses on idenitifying real-life datasets that weak supervision excells at. It is based on the [wrench library](https://github.com/JieyuZ2/wrench). Some of the pipeline design are consistent with paper [Weaker Than You Think: A Critical Look at Weakly Supervised Learning](https://arxiv.org/pdf/2305.17442.pdf).
+This project focuses on idenitifying real-life datasets that weak supervision excells at. It is based on the [`WRENCH`](https://github.com/JieyuZ2/wrench). Some of the pipeline design are consistent with paper [Weaker Than You Think: A Critical Look at Weakly Supervised Learning](https://arxiv.org/pdf/2305.17442.pdf).
 
 
 ## Installation
@@ -85,9 +85,10 @@ python3 val_size_experiment.py -p fine-tune-on-val -d chemprot -em BertClassifie
 ```
 
 [2]
+Running the supervised model on the clear validation data of AGNews dataset, on RoBERTa model, with validation dataset size of  5 per class, and fixed step size of 6000. There is no hyperparameter searching, and each hyperparameter is randomly chosen from the list in the hyperparameter search space called `BertClassifierModel_roberta.json`
 
 ```
-
+python3 val_size_experiment.py -p val-as-train -d agnews -em BertClassifierModel -emn roberta -vnpc 5 -fixStep 6000 -fixHyper
 ```
 
 ### Note:
