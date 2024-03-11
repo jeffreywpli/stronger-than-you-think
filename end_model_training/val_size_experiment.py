@@ -148,6 +148,8 @@ if __name__ == "__main__":
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
     else:
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
+    
+    
     if not os.path.exists("./models"):
         os.mkdir("./models")
     model_path = f"./models/{filename}.pt"
@@ -238,14 +240,8 @@ if __name__ == "__main__":
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
     elif args.pipeline =="testing":
-        pipeline = pipelines.train_strong
-        if args.val_number_per_class is not None:
-            indep_vars = [int(args.val_number_per_class) * num_classes]
-        else:
-            indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
-        max_iter = len(indep_vars)
         experiment_flag = True
-        #debugging experiment to run test with
+        raise NotImplementedError
     else:
         raise NotImplementedError
 
@@ -287,10 +283,7 @@ if __name__ == "__main__":
             patience=args.patience,
             evaluation_step=args.evaluation_step,
             device=args.device,
-            # TODO pass arguement to pipeline
             stratified=args.stratified,
-            # TODO pass arguement to fix hyperparam
-            # TODO whether perfrom 
             hard_label=args.hard_label,
             fix_hyperparam=args.fix_hyperparam,
             fix_steps=args.fix_steps,

@@ -32,7 +32,8 @@ target_dict = {
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
 
-# see wrench dataset basedataset.py, the following function is a modified version of the sample method in BaseDataset
+# see wrench dataset basedataset.py,
+# the following function is a modified version of the sample method in BaseDataset
 def custom_stratified_sample(dataset, input_var, return_dataset=True):
     """
     Perform stratified sampling on a dataset and return either a subset dataset or indices.
