@@ -70,7 +70,7 @@ def custom_stratified_sample(dataset, input_var, return_dataset=True):
 
 def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, bb, max_tokens, indep_var, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, device="cuda", *args,
                **kwargs):
     """
 
@@ -87,19 +87,6 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     random.seed(seed)
     np.random.seed(seed)
     
-    
-# def sample(self, alpha: Union[int, float], return_dataset=True):
-#     if isinstance(alpha, float):
-#         alpha = int(len(self) * alpha)
-#     idx = np.random.choice(len(self), alpha, replace=False)
-#     if return_dataset:
-#         return self.create_subset(idx)
-#     else:
-#         return list(idx)
-
-    # TODO
-    # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
-    # Now also takes a float
     if indep_var is not None and stratified:
         val_data = custom_stratified_sample(val_data, indep_var)
     elif indep_var is not None:
@@ -156,9 +143,9 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
         end_model = end_model_class(**em_search_space)
 
     # TODO if used fixed hyperparam set  n_step = 6000
-    if fix_hyperparam:
+    if fix_steps:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
-                  evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam)
+                  evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps)
     else:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
@@ -175,7 +162,7 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
 
 
 def train_strong(end_model, train_data, val_data, test_data, train_val_split, seed,
-                 target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, stratified, fix_hyperparam, bb,
+                 target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, stratified, fix_hyperparam, fix_steps, bb,
                  max_tokens, indep_var, experiment_flag, device="cuda", *args, **kwargs):
     """ 
         if training data is not given, 
@@ -237,9 +224,9 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
         end_model = end_model_class(**em_search_space)
 
     #TODO change this to fix step size
-    if fix_hyperparam:
+    if fix_steps:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_hyperparam)
+                evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_steps)
     else:
         end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps)
@@ -254,7 +241,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
 
 def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, train_val_split,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials, seed,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, bb, max_tokens, indep_var, model_path, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, model_path, device="cuda", *args,
                **kwargs):
     """
 
@@ -341,7 +328,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     # TODO check how to not to perform early stopping
     # TODO based on the fixed flag, do or not do train, val split
     # TODO check this from above for early stopping
-    if not fix_hyperparam:
+    if not fix_steps:
         val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_val_data.n_class = val_data.n_class
 
@@ -349,7 +336,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                     evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
     else:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                    evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam, pretrained_model = model_path)
+                    evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps, pretrained_model = model_path)
    
         
     # end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),

@@ -112,9 +112,10 @@ if __name__ == "__main__":
     parser.add_argument("-hl", "--hard-label", help="use hard label for label model (default: False)",
                         action='store_true')
     
-    #TODO add option for not doing hyperparam tuning
-    parser.add_argument("-fix", "--fix-hyperparam", help="Number of step size (Default = None)",type=int, default=None)
-
+    parser.add_argument("-fixHyper", "--fix-hyperparam", help="use fixed hyperparameter (default: False)", action='store_true')
+    
+    parser.add_argument("-fixStep", "--fix-steps", help="Number of step size (Default = None)",type=int, default=None)
+    
     parser.add_argument("-bb", "--backbone", help="backbone for the end model (default: BERT)", default="BERT")
 
     parser.add_argument("-emn", "--end-model-name", help="name for specific end model type eg. (Roberta for BERT)", default=None)
@@ -141,12 +142,12 @@ if __name__ == "__main__":
     else:
         jobs = args.jobs
         
-    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
+    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
     
     if args.end_model_name is not None:
-        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
     else:
-        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam)
+        filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
     if not os.path.exists("./models"):
         os.mkdir("./models")
     model_path = f"./models/{filename}.pt"
@@ -292,6 +293,7 @@ if __name__ == "__main__":
             # TODO whether perfrom 
             hard_label=args.hard_label,
             fix_hyperparam=args.fix_hyperparam,
+            fix_steps=args.fix_steps,
             bb=args.backbone,
             max_tokens=max_tokens,
             indep_var=indep_var,
