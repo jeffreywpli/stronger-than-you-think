@@ -139,11 +139,14 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                                                 n_steps=n_steps,
                                                 patience=patience, evaluation_step=evaluation_step, device=device)
 
-        end_model = end_model_class(**end_model_searched_params)
+        
     else:
-        end_model = end_model_class(**em_search_space)
+        end_model_searched_params = dict()
+        for key in end_model_search.keys()
+            end_model_searched_params[key] = random.choice(end_model_search[key])
+    
+    end_model = end_model_class(**end_model_searched_params)
 
-    # TODO if used fixed hyperparam set  n_step = 6000
     if fix_steps:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps)
@@ -189,16 +192,11 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
             if not fix_hyperparam:
                 train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
                 val_data.n_class = val_data.n_class   
-        # TODO: Check correctness here
         else:
             if indep_var is not None and stratified: 
                 train_data = custom_stratified_sample(train, indep_var)
             elif indep_var is not None:
                 train_data = train_data.sample(indep_var)  # indep var = train size percentage 
-    
-    #TODO check how to not to perform early stopping
-    
-    #TODO based on the fixed flag, do or not do train, val split
     
     end_model_class = getattr(endmodel, end_model)
 
@@ -211,7 +209,6 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
-    #TODO fix
     if not fix_hyperparam:
         end_model_searched_params = grid_search(end_model_search, dataset_train=train_data,
                                                 y_train=np.array(train_data.labels),
@@ -219,10 +216,12 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                                                 search_space=em_search_space, n_repeats=n_repeats_em, n_trials=n_trials,
                                                 parallel=False, n_steps=n_steps, patience=patience,
                                                 evaluation_step=evaluation_step, device=device)
-
-        end_model = end_model_class(**end_model_searched_params)
     else:
-        end_model = end_model_class(**em_search_space)
+        end_model_searched_params = dict()
+        for key in end_model_search.keys()
+            end_model_searched_params[key] = random.choice(end_model_search[key])
+
+    end_model = end_model_class(**end_model_searched_params)
 
     #TODO change this to fix step size
     if fix_steps:
@@ -303,7 +302,6 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
-    #TODO
     if not fix_hyperparam:
         end_model_searched_params = grid_search(end_model_search, dataset_train=covered_train_data, y_train=weak_labels,
                                                 dataset_valid=val_data, metric=target, direction='auto',
@@ -311,10 +309,13 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                                                 n_repeats=n_repeats_em, n_trials=n_trials, parallel=False,
                                                 n_steps=n_steps,
                                                 patience=patience, evaluation_step=evaluation_step, device=device)
-        end_model = end_model_class(**end_model_searched_params)
     else:
-        end_model = end_model_class(**em_search_space)
+        end_model_searched_params = dict()
+        for key in end_model_search.keys()
+            end_model_searched_params[key] = random.choice(end_model_search[key])
 
+    end_model = end_model_class(**end_model_searched_params)
+    
     end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
                   n_steps=n_steps, to_save = model_path)
@@ -326,9 +327,6 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
-    # TODO check how to not to perform early stopping
-    # TODO based on the fixed flag, do or not do train, val split
-    # TODO check this from above for early stopping
     if not fix_steps:
         val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_val_data.n_class = val_data.n_class
@@ -338,11 +336,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     else:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
                     evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps, pretrained_model = model_path)
-   
-        
-    # end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
-    #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
-
+                    
     val_em_val_score = end_model.test(val_data, target)
     val_em_test_score = end_model.test(test_data, target)
 

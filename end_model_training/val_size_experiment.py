@@ -106,7 +106,6 @@ if __name__ == "__main__":
 
     parser.add_argument("--device", help="Device to run discriminative model on (default: cuda)", default='cuda')
 
-    # TODO add arguement ...
     parser.add_argument("-stra", "--stratified", help="The number of elements for each class is set specifically to the number given (default: False)", action='store_true')
     
     parser.add_argument("-hl", "--hard-label", help="use hard label for label model (default: False)",
@@ -150,6 +149,7 @@ if __name__ == "__main__":
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
     
     
+    # used to save model dict for continous fine tuning for fine-tune-on-val pipeline.
     if not os.path.exists("./models"):
         os.mkdir("./models")
     model_path = f"./models/{filename}.pt"
