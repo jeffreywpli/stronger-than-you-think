@@ -88,10 +88,32 @@ python3 val_size_experiment.py -p fine-tune-on-val -d chemprot -em BertClassifie
 ```
 
 [2]
-Running the supervised model on the clear validation data of AGNews dataset, on RoBERTa model, with validation dataset size of  5 per class, and fixed step size of 6000. There is no hyperparameter searching, and each hyperparameter is randomly chosen from the list in the hyperparameter search space called `BertClassifierModel_roberta.json`
+Running the supervised model on the clear validation data of AGNews dataset, on RoBERTa model, with validation dataset size of  5 per class (Assume Uniformly distributed), and fixed step size of 6000. There is no hyperparameter searching, and each hyperparameter is randomly chosen from the list in the hyperparameter search space called `BertClassifierModel_roberta.json`
 
 ```
 python3 val_size_experiment.py -p val-as-train -d agnews -em BertClassifierModel -emn roberta -vnpc 5 -fixStep 6000 -fixHyper
+```
+
+[3]
+The startified sampling of the validation dataset is done by the `-vnpc` flag and the `-stra` flag. Together, they ensure that the validation dataset is stratified sampled with exactly n samples per class.
+```
+python3 val_size_experiment.py -p val-as-train -d agnews -em BertClassifierModel -emn roberta -vnpc 5 -fixStep 6000 -fixHyper -stra
+```
+In this case it is 5 samples per class.
+
+[4]
+
+To run multiple experiment together, take reference with the following code:
+```
+
+datasets=("semeval" "trec" "chemprot" )
+for dataset in ${datasets[@]}; do
+    python3 val_size_experiment.py -p val-as-train -d $dataset -em BertClassifierModel -emn roberta_fixed -vnpc 5 -fixStep 6000
+done
+
+for dataset in ${datasets[@]}; do
+    python3 val_size_experiment.py -d $dataset -p fine-tune-on-val -em BertClassifierModel -emn roberta_fixed -vnpc 5 -fixStep 6000
+done
 ```
 
 ### Note:
