@@ -24,14 +24,13 @@ def pipeline_loader(pipeline, *args, **kwargs):
     return pipeline(*args, **kwargs)
 
 
-def get_filename(data, pipeline, label_model, end_model, backbone, stratified, hard_label, fix_hyperparam):
+def get_filename(data, pipeline, label_model, end_model, backbone, stratified, hard_label, fix_hyperparam, fix_steps):
     em_name = backbone + "_" + end_model if end_model == "Cosine" else end_model
-
-    la = "hard" if hard_label else "soft"
-    # TODO Add whether the sampling is stratified or not 
+    la = "hard" if hard_label else "soft" 
     stra = "stratified" if stratified else "unstratified"
-    fix = "fixed_hyperparam" if fix_hyperparam else "not_fixed_hyperparam"
-    return '-'.join(map(inflection.underscore, [data.replace('-', "_"), pipeline.replace('-', "_"), label_model, em_name, la, stra, fix]))
+    fix_h = "fixed_hyperparam" if fix_hyperparam else "not_fixed_hyperparam"
+    fix_s = "fixed_steps"if fix_steps else "not_fixed_steps"
+    return '-'.join(map(inflection.underscore, [data.replace('-', "_"), pipeline.replace('-', "_"), label_model, em_name, la, stra, fix_h, fix_s]))
 
 
 @contextlib.contextmanager

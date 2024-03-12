@@ -32,7 +32,8 @@ target_dict = {
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
 
-# see wrench dataset basedataset.py, the following function is a modified version of the sample method in BaseDataset
+# see wrench dataset basedataset.py,
+# the following function is a modified version of the sample method in BaseDataset
 def custom_stratified_sample(dataset, input_var, return_dataset=True):
     """
     Perform stratified sampling on a dataset and return either a subset dataset or indices.
@@ -67,10 +68,11 @@ def custom_stratified_sample(dataset, input_var, return_dataset=True):
     else:
         # Return the list of sampled indices directly
         return sampled_indices
+    
 
 def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, bb, max_tokens, indep_var, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, device="cuda", *args,
                **kwargs):
     """
 
@@ -138,14 +140,20 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                                                 n_steps=n_steps,
                                                 patience=patience, evaluation_step=evaluation_step, device=device)
 
-        end_model = end_model_class(**end_model_searched_params)
+        
     else:
-        end_model = end_model_class(**em_search_space)
+        # If using fixed parameter size, randomly pick one from each hyperparameter from 
+        # the end_model_search_space. If the fixed search space have list size to 1,
+        # the result is deterministic.
+        end_model_searched_params = dict()
+        for key in em_search_space.keys():
+            end_model_searched_params[key] = random.choice(em_search_space[key])
+    
+    end_model = end_model_class(**end_model_searched_params)
 
-    # TODO if used fixed hyperparam set  n_step = 6000
-    if fix_hyperparam:
+    if fix_steps:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
-                  evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam)
+                  evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps)
     else:
         end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
@@ -162,7 +170,7 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
 
 
 def train_strong(end_model, train_data, val_data, test_data, train_val_split, seed,
-                 target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, stratified, fix_hyperparam, bb,
+                 target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, stratified, fix_hyperparam, fix_steps, bb,
                  max_tokens, indep_var, experiment_flag, device="cuda", *args, **kwargs):
     """ 
         if training data is not given, 
@@ -172,12 +180,10 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     random.seed(seed)
     np.random.seed(seed)
 
-    # TODO check if stratfied, and perform different sampling
+    # Check if stratfied, and perform different sampling
     # in case of training data is None, we use validation data as training data
     if experiment_flag:
-        temp = val_data
-        val_data = custom_stratified_sample(train_data, indep_var)
-        train_data = custom_stratified_sample(temp, indep_var)
+        return
     else:
         if train_data is None: # TODO
         # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
@@ -185,19 +191,16 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                 val_data = custom_stratified_sample(val_data, indep_var)
             elif indep_var is not None:
                 val_data = val_data.sample(indep_var) # indep var = val size percentage
-            if not fix_hyperparam:
+            # if using fixed hyperparam size and step size, 
+            #  no need to further split validation into train and val data.
+            if not fix_hyperparam and not fixed_steps:
                 train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
                 val_data.n_class = val_data.n_class   
-        # TODO: Check correctness here
         else:
             if indep_var is not None and stratified: 
                 train_data = custom_stratified_sample(train, indep_var)
             elif indep_var is not None:
                 train_data = train_data.sample(indep_var)  # indep var = train size percentage 
-    
-    #TODO check how to not to perform early stopping
-    
-    #TODO based on the fixed flag, do or not do train, val split
     
     end_model_class = getattr(endmodel, end_model)
 
@@ -210,7 +213,6 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
-    #TODO fix
     if not fix_hyperparam:
         end_model_searched_params = grid_search(end_model_search, dataset_train=train_data,
                                                 y_train=np.array(train_data.labels),
@@ -218,15 +220,19 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                                                 search_space=em_search_space, n_repeats=n_repeats_em, n_trials=n_trials,
                                                 parallel=False, n_steps=n_steps, patience=patience,
                                                 evaluation_step=evaluation_step, device=device)
-
-        end_model = end_model_class(**end_model_searched_params)
     else:
-        end_model = end_model_class(**em_search_space)
+        # If using fixed parameter size, randomly pick one from each hyperparameter from 
+        # the end_model_search_space. If the fixed search space have list size to 1,
+        # the result is deterministic.
+        end_model_searched_params = dict()
+        for key in em_search_space.keys():
+            end_model_searched_params[key] = random.choice(em_search_space[key])
 
-    #TODO change this to fix step size
-    if fix_hyperparam:
+    end_model = end_model_class(**end_model_searched_params)
+
+    if fix_steps:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_hyperparam)
+                evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_steps)
     else:
         end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps)
@@ -241,7 +247,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
 
 def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, train_val_split,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials, seed,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, bb, max_tokens, indep_var, model_path, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, model_path, device="cuda", *args,
                **kwargs):
     """
 
@@ -259,6 +265,8 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     random.seed(seed)
     np.random.seed(seed)
     
+    # note indep_var is a percentage or a int, (It shouldn't be a float if stratified is True though)
+    # if is int
     if indep_var is not None and stratified:
         val_data = custom_stratified_sample(val_data, indep_var)
     elif indep_var is not None:
@@ -299,7 +307,6 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     else:
         end_model_search = end_model_class(max_tokens=max_tokens) 
 
-    #TODO
     if not fix_hyperparam:
         end_model_searched_params = grid_search(end_model_search, dataset_train=covered_train_data, y_train=weak_labels,
                                                 dataset_valid=val_data, metric=target, direction='auto',
@@ -307,10 +314,13 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                                                 n_repeats=n_repeats_em, n_trials=n_trials, parallel=False,
                                                 n_steps=n_steps,
                                                 patience=patience, evaluation_step=evaluation_step, device=device)
-        end_model = end_model_class(**end_model_searched_params)
     else:
-        end_model = end_model_class(**em_search_space)
+        end_model_searched_params = dict()
+        for key in em_search_space.keys():
+            end_model_searched_params[key] = random.choice(em_search_space[key])
 
+    end_model = end_model_class(**end_model_searched_params)
+    
     end_model.fit(dataset_train=covered_train_data, dataset_valid=val_data, y_train=weak_labels,
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device,
                   n_steps=n_steps, to_save = model_path)
@@ -322,11 +332,10 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
     em_val_score = end_model.test(val_data, target)
     em_test_score = end_model.test(test_data, target)
 
-    # TODO check how to not to perform early stopping
-    # TODO based on the fixed flag, do or not do train, val split
-    # TODO check this from above for early stopping
-    
-    if not fix_hyperparam:
+
+    #  futher fine-tuining on the validation set with clean label.
+    #  if fixed step size, no need to resplit val set for early stopping.
+    if not fix_steps:
         val_train_data, val_val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
         val_val_data.n_class = val_data.n_class
 
@@ -334,12 +343,8 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                     evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
     else:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                    evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_hyperparam, pretrained_model = model_path)
-   
-        
-    # end_model.fit(dataset_train=val_data, y_train=np.array(val_data.labels),
-    #               evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
-
+                    evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps, pretrained_model = model_path)
+                    
     val_em_val_score = end_model.test(val_data, target)
     val_em_test_score = end_model.test(test_data, target)
 
