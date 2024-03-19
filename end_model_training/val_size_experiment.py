@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 target_dict = {
     'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial'],
     'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube', 'amazon-high-card', 
-    'banking-high-card', 'news-category', 'amazon31', 'banking77', 'massive', 'dbpedia-219', 'massive_lowcard', 'dbpedia'],
+    'banking-high-card', 'news-category', 'amazon31', 'banking77', 'massive', 'dbpedia-219', 'massive_lowcard', 'dbpedia', 'claude9'],
 }
 
 token_dict = {
@@ -53,7 +53,8 @@ token_dict = {
     "trec": 64,
     "chemprot": 400,
     "youtube": 512,
-    "spouse" : 525
+    "spouse" : 525,
+    "claude9": 512
 }
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
@@ -181,7 +182,8 @@ if __name__ == "__main__":
 
     if args.label_model == "MajorityVoting" and args.hard_label == False:
         warnings.warn("Using soft label for MajorityVoting")
-
+    print(args.data)
+    print("target: {}".format(data_to_target[args.data]))
     target = data_to_target[args.data]
     if args.pipeline == "val-as-train" and args.label_model != "MajorityVoting":
         raise NotImplementedError("val-as-train pipeline is only implemented for majority voting label model.")
