@@ -193,9 +193,12 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                 val_data = val_data.sample(indep_var) # indep var = val size percentage
             # if using fixed hyperparam size and step size, 
             #  no need to further split validation into train and val data.
-            if not fix_hyperparam and not fixed_steps:
+            if not fix_hyperparam or not fixed_steps:
                 train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
-                val_data.n_class = val_data.n_class   
+                val_data.n_class = val_data.n_class 
+            else: 
+                train_data = val_data
+                val_data = None  
         else:
             if indep_var is not None and stratified: 
                 train_data = custom_stratified_sample(train, indep_var)
@@ -231,8 +234,8 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     end_model = end_model_class(**end_model_searched_params)
 
     if fix_steps:
-        end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=fix_steps)
+        end_model.fit(dataset_train=train_data,  y_train=np.array(train_data.labels),
+                evaluation_step=(fix_steps + 1), patience=-1, metric=target, device=device, n_steps=fix_steps)
     else:
         end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps)
@@ -343,7 +346,7 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                     evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps, pretrained_model = model_path)
     else:
         end_model.fit(dataset_train=val_data,  y_train=np.array(val_data.labels),
-                    evaluation_step=evaluation_step, patience=-1, metric=target, device=device, n_steps=fix_steps, pretrained_model = model_path)
+                    evaluation_step=(fix_steps+1), patience=-1, metric=target, device=device, n_steps=fix_steps, pretrained_model = model_path)
                     
     val_em_val_score = end_model.test(val_data, target)
     val_em_test_score = end_model.test(test_data, target)
