@@ -182,6 +182,7 @@ if __name__ == "__main__":
         warnings.warn("Using soft label for MajorityVoting")
 
     target = data_to_target[args.data]
+
     if args.pipeline == "val-as-train" and args.label_model != "MajorityVoting":
         raise NotImplementedError("val-as-train pipeline is only implemented for majority voting label model.")
 
