@@ -193,7 +193,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                 val_data = val_data.sample(indep_var) # indep var = val size percentage
             # if using fixed hyperparam size and step size, 
             #  no need to further split validation into train and val data.
-            if not fix_hyperparam or not fixed_steps:
+            if not fix_hyperparam or not fix_steps:
                 train_data, val_data = val_data.create_split(val_data.sample(train_val_split, return_dataset=False))
                 val_data.n_class = val_data.n_class 
             else: 
