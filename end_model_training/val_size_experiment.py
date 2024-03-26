@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 target_dict = {
     'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial'],
     'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube', 'amazon-high-card', 
-    'banking-high-card', 'news-category', 'amazon31', 'banking77', 'massive', 'dbpedia-219', 'massive_lowcard', 'dbpedia', 'claude9'],
+    'banking-high-card', 'news-category', 'amazon31', 'banking77', 'massive', 'dbpedia-219', 'massive_lowcard', 'dbpedia', 'claude9', 'massive18'],
 }
 
 token_dict = {
