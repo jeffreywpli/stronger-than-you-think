@@ -52,7 +52,8 @@ token_dict = {
     "trec": 64,
     "chemprot": 400,
     "youtube": 512,
-    "spouse" : 525
+    "spouse" : 525,
+    "claude9": 512
 }
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
@@ -180,7 +181,8 @@ if __name__ == "__main__":
 
     if args.label_model == "MajorityVoting" and args.hard_label == False:
         warnings.warn("Using soft label for MajorityVoting")
-
+    print(args.data)
+    print("target: {}".format(data_to_target[args.data]))
     target = data_to_target[args.data]
 
     if args.pipeline == "val-as-train" and args.label_model != "MajorityVoting":

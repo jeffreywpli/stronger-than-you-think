@@ -67,7 +67,10 @@ class BaseDataset(ABC):
         data = json.load(open(data_path, 'r'))
         for i, item in tqdm(data.items()):
             self.ids.append(i)
-            self.labels.append(item['label'])
+            if 'label' in item:
+                self.labels.append(item['label'])
+            else:
+                self.labels.append(item['labels'])
             self.weak_labels.append(item['weak_labels'])
             self.examples.append(item['data'])
 
