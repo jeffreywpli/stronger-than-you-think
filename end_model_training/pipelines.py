@@ -198,7 +198,6 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
                 val_data.n_class = val_data.n_class 
             else: 
                 train_data = val_data
-                val_data = None  
         else:
             if indep_var is not None and stratified: 
                 train_data = custom_stratified_sample(train, indep_var)
@@ -240,7 +239,10 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
         end_model.fit(dataset_train=train_data, dataset_valid=val_data,  y_train=np.array(train_data.labels),
                   evaluation_step=evaluation_step, patience=patience, metric=target, device=device, n_steps=n_steps)
 
-    em_val_score = end_model.test(val_data, target)
+    if val_data is not None:
+        em_val_score = end_model.test(val_data, target)
+    else:
+        em_val_score = 1.0
     em_test_score = end_model.test(test_data, target)
     return {"em_test": em_test_score, "em_val": em_val_score}
 
