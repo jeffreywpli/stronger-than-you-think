@@ -41,8 +41,8 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
 logger = logging.getLogger(__name__)
 
 target_dict = {
-    'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial'],
-    'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube', 'news-category', 'amazon31', 'banking77', 'massive18', 'dbpedia-219', 'massive_lowcard', 'dbpedia', 'claude9'],
+    'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial', 'claude9'],
+    'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube', 'news-category', 'amazon31', 'banking77', 'massive18', 'dbpedia-219', 'massive_lowcard', 'dbpedia'],
 }
 
 token_dict = {
@@ -52,7 +52,8 @@ token_dict = {
     "trec": 64,
     "chemprot": 400,
     "youtube": 512,
-    "spouse" : 525
+    "spouse" : 525,
+    "claude9": 512
 }
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
@@ -180,7 +181,8 @@ if __name__ == "__main__":
 
     if args.label_model == "MajorityVoting" and args.hard_label == False:
         warnings.warn("Using soft label for MajorityVoting")
-
+    print(args.data)
+    print("target: {}".format(data_to_target[args.data]))
     target = data_to_target[args.data]
 
     if args.pipeline == "val-as-train" and args.label_model != "MajorityVoting":
