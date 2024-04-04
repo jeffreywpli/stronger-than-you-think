@@ -2,6 +2,6 @@
   "lr": [2e-05],
   "l2": [1e-4],
   "batch_size": [32],
-  "model_name": ["legal-bert-base-uncased"]
+  "model_name": ["nlpaueb/legal-bert-base-uncased"]
   
 }
