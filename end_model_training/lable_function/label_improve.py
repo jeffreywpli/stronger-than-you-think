@@ -86,40 +86,40 @@ def chemprot_enhanced(df):
     df['entity2_index'] = df.apply(lambda row: calculate_accurate_word_index(row['span2'], row['text']), axis=1)
     return df
 
-# Function to accurately calculate word indices, especially for entities at the beginning of the text
-def get_word_indices(text):
-    words = text.split()
-    indices = []
-    start = 0
-    for word in words:
-        start = text.find(word, start)
-        end = start + len(word)
-        indices.append((start, end))
-        start = end
-    return indices
+# # Function to accurately calculate word indices, especially for entities at the beginning of the text
+# def get_word_indices(text):
+#     words = text.split()
+#     indices = []
+#     start = 0
+#     for word in words:
+#         start = text.find(word, start)
+#         end = start + len(word)
+#         indices.append((start, end))
+#         start = end
+#     return indices
 
-def calculate_word_index(span, text):
-    word_indices = get_word_indices(text)
-    # Find the word or words that correspond to the span
-    word_index = [index for index, (start, end) in enumerate(word_indices) if start >= span[0] and end <= span[1]]
+# def calculate_word_index(span, text):
+#     word_indices = get_word_indices(text)
+#     # Find the word or words that correspond to the span
+#     word_index = [index for index, (start, end) in enumerate(word_indices) if start >= span[0] and end <= span[1]]
     
-    return sum(word_index) / len(word_index) if word_index else -1
+#     return sum(word_index) / len(word_index) if word_index else -1
 
 # Redefine the function to handle partial words in spans and return the word index accurately
-def refined_calculate_word_index(span, text):
-    words = text.split()
-    current_position = 0
-    for index, word in enumerate(words):
-        word_start = current_position
-        word_end = current_position + len(word)
+# def refined_calculate_word_index(span, text):
+#     words = text.split()
+#     current_position = 0
+#     for index, word in enumerate(words):
+#         word_start = current_position
+#         word_end = current_position + len(word)
         
-        # Check if the span starts or ends within the word
-        if word_start <= span[0] < word_end or word_start < span[1] <= word_end:
-            return index
+#         # Check if the span starts or ends within the word
+#         if word_start <= span[0] < word_end or word_start < span[1] <= word_end:
+#             return index
         
-        current_position = word_end + 1  # Move to the start of the next word (+1 for the space)
+#         current_position = word_end + 1  # Move to the start of the next word (+1 for the space)
 
-    return -1  # In case no matching word is found
+#     return -1  # In case no matching word is found
 
 def calculate_accurate_word_index(span, text):
     words = text.split()
