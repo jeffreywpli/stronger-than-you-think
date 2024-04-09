@@ -41,7 +41,7 @@ def chemprot_to_df(dataset):
     span1 = [dataset[i]['data']['span1'] for i in dataset.keys()]    
     span2 = [dataset[i]['data']['span2'] for i in dataset.keys()]    
     weak_labels = [dataset[i]['weak_labels'] for i in dataset.keys()]    
-    data_dict = {'text': text, 'labels': labels, 'entity1': entity1, 'entity2': entity2, 'span1': span1, 'span2': span2, 'weak_labels': weak_labels}
+    data_dict = {'text': text, 'label': labels, 'entity1': entity1, 'entity2': entity2, 'span1': span1, 'span2': span2, 'weak_labels': weak_labels}
     df = pd.DataFrame(data=data_dict, index=indices)
     return df
 
@@ -56,7 +56,7 @@ def df_to_chemprot(df):
             'span2': row['span2']
         }
         dataset[str(index)] = {
-            'label': row['labels'],
+            'label': row['label'],
             'data': data,
             'weak_labels': row['weak_labels']
         }
@@ -170,3 +170,32 @@ def keywords_to_LFs(keyword_dict):
         for k in v:
             lfs.append(LabelingFunction(name=f"lf_{k}", f=_keyword_LF, resources={'keyword':k, 'label':l}))
     return lfs
+
+def chemprot_df_with_new_lf(df, lfs):
+    df = df.copy()
+    #enhance df
+    df = chemprot_enhanced(df)
+    #apply new lfs
+    applier = PandasLFApplier(lfs=lfs)
+    L_train = applier.apply(df)
+    # add the new lfs to the df's weaklabels column
+    df['weak_labels'] = L_train.tolist()
+    # delete the added two column from chemprot_enhanced:
+    df = df.drop(columns=['entity1_index', 'entity2_index'])
+    return df
+
+
+def see_label_function(df, lfs):
+    length = len(df)
+    df = df.copy()
+    df = chemprot_enhanced(df)
+    applier = PandasLFApplier(lfs=lfs)
+    L_train = applier.apply(df)
+    df = df.drop(columns=['entity1_index', 'entity2_index'])
+    # if the label function is -1 then drop that row of the df
+    drop_indices = [i for i in range(len(L_train)) if (L_train[i] == -1)]
+    df = df.drop(df.iloc[drop_indices].index)
+    return df, len(df)
+
+
+#  and df.iloc[i]['label']!=0
