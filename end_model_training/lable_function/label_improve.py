@@ -9,14 +9,6 @@ import json
 import pandas as pd
 import label_improve
 
-# def wrench_to_df(dataset):
-#     indices = [int(i) for i in dataset.keys()]
-#     text = [ dataset[str(i)]['data']['text'] for i in range(len(indices))]    
-#     labels = [ dataset[str(i)]['label'] for i in range(len(indices))]    
-#     data_dict = {'text': text, 'labels': labels}
-#     df = pd.DataFrame(data=data_dict, index=indices)
-#     return df
-
 ABSTAIN = -1
 
 def find_entity_indices(text, entity1, entity2):
@@ -72,12 +64,6 @@ def find_entity_word_indices(text, entity):
     indices = [i for i, word in enumerate(words) if any(entity_word in word for entity_word in entity_words)]
     return sum(indices) / len(indices) if indices else ABSTAIN
 
-# def chemprot_enhanced(df):
-#     df = df.copy()
-#     df['entity1_index'] = df.apply(lambda row: find_entity_word_indices(row['text'], row['entity1']), axis=1)
-#     df['entity2_index'] = df.apply(lambda row: find_entity_word_indices(row['text'], row['entity2']), axis=1)
-#     return df
-
 def chemprot_enhanced(df):
     if len(df) == 0:
         return df
@@ -86,40 +72,6 @@ def chemprot_enhanced(df):
     df['entity2_index'] = df.apply(lambda row: calculate_accurate_word_index(row['span2'], row['text']), axis=1)
     return df
 
-# # Function to accurately calculate word indices, especially for entities at the beginning of the text
-# def get_word_indices(text):
-#     words = text.split()
-#     indices = []
-#     start = 0
-#     for word in words:
-#         start = text.find(word, start)
-#         end = start + len(word)
-#         indices.append((start, end))
-#         start = end
-#     return indices
-
-# def calculate_word_index(span, text):
-#     word_indices = get_word_indices(text)
-#     # Find the word or words that correspond to the span
-#     word_index = [index for index, (start, end) in enumerate(word_indices) if start >= span[0] and end <= span[1]]
-    
-#     return sum(word_index) / len(word_index) if word_index else -1
-
-# Redefine the function to handle partial words in spans and return the word index accurately
-# def refined_calculate_word_index(span, text):
-#     words = text.split()
-#     current_position = 0
-#     for index, word in enumerate(words):
-#         word_start = current_position
-#         word_end = current_position + len(word)
-        
-#         # Check if the span starts or ends within the word
-#         if word_start <= span[0] < word_end or word_start < span[1] <= word_end:
-#             return index
-        
-#         current_position = word_end + 1  # Move to the start of the next word (+1 for the space)
-
-#     return -1  # In case no matching word is found
 
 def calculate_accurate_word_index(span, text):
     words = text.split()
@@ -143,8 +95,6 @@ def calculate_accurate_word_index(span, text):
         return (start_index + end_index) / 2
     return -1
 
-
-# Calculates coverage given a label matrix
 def calc_coverage(L):
     return (L.max(axis=1) > -1).mean()
 
