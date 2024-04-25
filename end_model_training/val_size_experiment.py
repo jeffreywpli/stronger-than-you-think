@@ -241,6 +241,7 @@ if __name__ == "__main__":
         if args.val_number_per_class is not None:
             indep_vars = [int(args.val_number_per_class) * val_data.n_class]
         else:
+            # TODO: change this to denser range of validation sizes
             indep_vars = [1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0]  # % of validation used
         max_iter = len(indep_vars)
     elif args.pipeline =="testing":
