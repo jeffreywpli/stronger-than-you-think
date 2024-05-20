@@ -7,7 +7,12 @@ from snorkel.labeling import LFAnalysis
 from snorkel.labeling.model import MajorityLabelVoter
 import json
 import pandas as pd
-import label_improve
+from googletrans import Translator
+from tqdm import tqdm
+from deep_translator import GoogleTranslator
+import deepl
+import concurrent.futures
+
 
 ABSTAIN = -1
 
@@ -37,6 +42,15 @@ def chemprot_to_df(dataset):
     df = pd.DataFrame(data=data_dict, index=indices)
     return df
 
+def massive_to_df(dataset):
+    indices = [int(i) for i in dataset.keys()]
+    text = [ dataset[str(i)]['data']['text'] for i in range(len(indices))]    
+    labels = [ dataset[str(i)]['label'] for i in range(len(indices))]    
+    weak_labels = [dataset[i]['weak_labels'] for i in dataset.keys()]    
+    data_dict = {'text': text, 'label': labels, 'weak_labels': weak_labels}
+    df = pd.DataFrame(data=data_dict, index=indices)
+    return df
+
 def df_to_chemprot(df):
     dataset = {}
     for index, row in df.iterrows():
@@ -54,9 +68,22 @@ def df_to_chemprot(df):
         }
     return dataset
 
+def df_to_massive(df):
+    dataset = {}
+    for index, row in df.iterrows():
+        data = {
+            'text': row['text']
+        }
+        dataset[str(index)] = {
+            'label': row['label'],
+            'data': data,
+            'weak_labels': row['weak_labels']
+        }
+    return dataset
+
 def save_dataset(dataset, path):
     with open(path, 'w') as file:
-        json.dump(dataset, file)
+        json.dump(dataset, file, indent=4, ensure_ascii=False)
         
 def find_entity_word_indices(text, entity):
     words = text.split()
@@ -134,6 +161,23 @@ def chemprot_df_with_new_lf(df, lfs):
     df = df.drop(columns=['entity1_index', 'entity2_index'])
     return df
 
+def massive_df_with_new_lf(df, lfs):
+    df = df.copy()
+    #apply new lfs
+    applier = PandasLFApplier(lfs=lfs)
+    L_train = applier.apply(df)
+    # add the new lfs to the df's weaklabels column
+    df['weak_labels'] = L_train.tolist()
+    # delete the added two column from chemprot_enhanced:
+    return df
+
+def df_to_df_with_new_lf(df_target, df_source, source_lfs):
+    df_target = df_target.copy()
+    df_source = df_source.copy()
+    applieer = PandasLFApplier(lfs=source_lfs)
+    L_train = applieer.apply(df_source)
+    df_target['weak_labels'] = L_train.tolist()
+    return df_target
 
 def see_label_function(df, lfs):
     length = len(df)
@@ -148,4 +192,134 @@ def see_label_function(df, lfs):
     return df, len(df)
 
 
-#  and df.iloc[i]['label']!=0
+# utility
+
+def df_with_label(df, label):
+    df = df.copy()
+    # check the weak_labels column, if label is in the list then preserve the row
+    df = df[df['weak_labels'].apply(lambda x: label in x)]
+    return df
+
+# translation
+
+def translate_text(text, dest_language):
+    translator = Translator()
+    translation = translator.translate(text, dest=dest_language)
+    return translation.text
+
+def translate_src(text, src_language):
+    translator = Translator()
+    translation = translator.translate(text, src=src_language)
+    return translation.text
+
+# translate df's text to english
+
+# def translate_df_to_english(df, src_language):
+#     tqdm.pandas()
+#     df = df.copy()
+#     # df['text'] = df['text'].apply(lambda x: translate_src(x,  src_language))
+#     df['text'] = df['text'].progress_apply(lambda x: translate_src(x,  src_language))
+#     return df
+
+def translate_df_to_english(df, src_language, batch_size=25):
+    df = df.copy()
+    texts = df['text'].astype(str).tolist()  # Ensure all texts are strings
+    translator = GoogleTranslator(source=src_language, target='en')
+    
+    translated_texts = []
+    
+    # Create a progress bar
+    for i in tqdm(range(0, len(texts), batch_size), desc="Translating"):
+        batch = texts[i:i + batch_size]
+        try:
+            translations = translator.translate_batch(batch)
+            translated_texts.extend(translations)
+        except Exception as e:
+            print(f"Error: {e}. Some texts may not be translated.")
+            translated_texts.extend([None] * len(batch))  # Fill with None if translation fails
+
+    df['text'] = translated_texts
+    return df
+
+
+# def translate_df_to_english(df, src_language, batch_size=100):
+#     df = df.copy()
+#     texts = df['text'].tolist()
+#     translator = Translator()
+    
+#     translated_texts = []
+    
+#     # Create a progress bar
+#     for i in tqdm(range(0, len(texts), batch_size), desc="Translating"):
+#         batch = texts[i:i + batch_size]
+#         translations = translator.translate(batch, src=src_language, dest='en')
+#         translated_texts.extend([translation.text for translation in translations])
+    
+#     df['text'] = translated_texts
+#     return df
+
+
+# translate df's text to another language
+
+def translate_df(df, dest_language):
+    df = df.copy()
+    df['text'] = df['text'].apply(lambda x: translate_text(x, dest_language))
+    return df
+
+
+
+def deep_translate_df_to_english(df, auth_key, src_language='ZH', batch_size=50, max_workers=5):
+    df = df.copy()
+    texts = df['text'].astype(str).tolist()  # Ensure all texts are strings
+    translator = deepl.Translator(auth_key)
+    
+    translated_texts = []
+
+    def translate_batch(batch):
+        try:
+            translations = translator.translate_text(batch, source_lang=src_language, target_lang='EN-US')
+            return [translation.text for translation in translations]
+        except Exception as e:
+            print(f"Error: {e}. Some texts may not be translated.")
+            return [None] * len(batch)
+
+    # Create a progress bar
+    with tqdm(total=len(texts), desc="Translating") as pbar:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_batch = {executor.submit(translate_batch, texts[i:i + batch_size]): i for i in range(0, len(texts), batch_size)}
+            for future in concurrent.futures.as_completed(future_to_batch):
+                batch_index = future_to_batch[future]
+                try:
+                    translated_batch = future.result()
+                    translated_texts.extend(translated_batch)
+                    pbar.update(len(translated_batch))
+                except Exception as exc:
+                    print(f"Batch {batch_index} generated an exception: {exc}")
+                    translated_texts.extend([None] * batch_size)
+                    pbar.update(batch_size)
+
+    df['text'] = translated_texts
+    return df
+
+def analysis_LFs(lfs, df, class_size):
+    L_dev = apply_LFs(lfs, df)
+    print("Test Coverage:", calc_coverage(L_dev))
+    lf_analysis = LFAnalysis(L_dev, lfs = lfs).lf_summary(Y = df.label.values)
+    lf_analysis['Conflict Ratio'] = lf_analysis['Conflicts'] / lf_analysis['Coverage']
+    majority_model = MajorityLabelVoter(class_size)
+    preds_valid = majority_model.predict(L=L_dev)
+    print("acuracy for the not abstains")
+    print((preds_valid[preds_valid != -1] == df[preds_valid != -1].label.values).mean())
+    print("acuracy for all")
+    print((preds_valid == df.label.values).mean())
+    return lf_analysis
+    
+def analysis_LFs_with_weak_labels(df, class_size):
+    L_dev = np.array(df.weak_labels.tolist())
+    print("Test Coverage:", calc_coverage(L_dev))
+    majority_model = MajorityLabelVoter(class_size)
+    preds_valid = majority_model.predict(L=L_dev)
+    print("acuracy for the not abstains")
+    print((preds_valid[preds_valid != -1] == df[preds_valid != -1].label.values).mean())
+    print("acuracy for all")
+    print((preds_valid == df.label.values).mean())

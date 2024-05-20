@@ -1,0 +1,6 @@
+{
+    "lr": [2e-05],
+    "l2": [1e-4],
+    "batch_size": [32],
+    "model_name": ["google-bert/bert-base-chinese"]
+  }
