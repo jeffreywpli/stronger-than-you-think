@@ -267,39 +267,47 @@ def translate_df(df, dest_language):
     return df
 
 
-
 def deep_translate_df_to_english(df, auth_key, src_language='ZH', batch_size=50, max_workers=5):
     df = df.copy()
     texts = df['text'].astype(str).tolist()  # Ensure all texts are strings
     translator = deepl.Translator(auth_key)
     
-    translated_texts = []
+    translated_texts = [None] * len(texts)
 
-    def translate_batch(batch):
+    def translate_batch(start_index, batch):
         try:
             translations = translator.translate_text(batch, source_lang=src_language, target_lang='EN-US')
-            return [translation.text for translation in translations]
+            return (start_index, [translation.text for translation in translations])
         except Exception as e:
             print(f"Error: {e}. Some texts may not be translated.")
-            return [None] * len(batch)
+            return (start_index, [None] * len(batch))
 
     # Create a progress bar
     with tqdm(total=len(texts), desc="Translating") as pbar:
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_batch = {executor.submit(translate_batch, texts[i:i + batch_size]): i for i in range(0, len(texts), batch_size)}
-            for future in concurrent.futures.as_completed(future_to_batch):
-                batch_index = future_to_batch[future]
-                try:
-                    translated_batch = future.result()
-                    translated_texts.extend(translated_batch)
-                    pbar.update(len(translated_batch))
-                except Exception as exc:
-                    print(f"Batch {batch_index} generated an exception: {exc}")
-                    translated_texts.extend([None] * batch_size)
-                    pbar.update(batch_size)
+            future_to_index = {executor.submit(translate_batch, i, texts[i:i + batch_size]): i for i in range(0, len(texts), batch_size)}
+            for future in concurrent.futures.as_completed(future_to_index):
+                batch_index, translated_batch = future.result()
+                translated_texts[batch_index:batch_index + len(translated_batch)] = translated_batch
+                pbar.update(len(translated_batch))
 
     df['text'] = translated_texts
     return df
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def analysis_LFs(lfs, df, class_size):
     L_dev = apply_LFs(lfs, df)
