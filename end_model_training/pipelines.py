@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 target_dict = {
     'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial'],
-    'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube','massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append'],
+    'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube','massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2'],
 }
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
