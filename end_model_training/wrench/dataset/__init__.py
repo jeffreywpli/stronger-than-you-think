@@ -4,7 +4,7 @@ from .seqdataset import BaseSeqDataset
 from .torchdataset import sample_batch, TorchDataset, BERTTorchTextClassDataset, BERTTorchRelationClassDataset, ImageTorchDataset
 
 numeric_datasets = ['census', 'mushroom', 'spambase', 'PhishingWebsites', 'Bioresponse', 'bank-marketing', 'basketball', 'tennis', 'commercial']
-text_datasets = ['agnews', 'imdb', 'sms', 'trec', 'yelp', 'youtube', 'banking77', 'amazon31', 'dbpedia', 'massive18', 'claude9', 'massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad']
+text_datasets = ['agnews', 'imdb', 'sms', 'trec', 'yelp', 'youtube', 'banking77', 'amazon31', 'dbpedia', 'massive18', 'claude9', 'massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2']
 relation_dataset = ['cdr', 'spouse', 'chemprot', 'semeval']
 cls_dataset_list = numeric_datasets + text_datasets + relation_dataset
 bin_cls_dataset_list = numeric_datasets + ['cdr', 'spouse', 'sms', 'yelp', 'imdb', 'youtube']
