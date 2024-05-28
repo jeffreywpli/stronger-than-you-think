@@ -251,6 +251,25 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError
 
+# moved here for prediciton label saving
+    if not os.path.exists("./results"):
+        os.mkdir("./results")
+
+    count = 1
+    while (1):
+        if count == 1:
+            num = ""
+        else:
+            num = "_(" + str(count) + ")"
+        if not os.path.exists("./results/{}/{}{}.json".format(args.data, filename, num)):
+            filename += num 
+            break
+        count += 1
+    if not os.path.exists("./results/{}".format(args.data)):
+        os.mkdir("./results/{}".format(args.data))
+
+
+
     ix = 0
     while ix < len(indep_vars) and ix < args.max_iter:
 
@@ -298,7 +317,8 @@ if __name__ == "__main__":
             indep_var=indep_var,
             seed=run_id,
             model_path=model_path,
-            experiment_flag=experiment_flag
+            experiment_flag=experiment_flag,
+            filename = "./results/{}/{}.csv".format(args.data, filename)
         ) for run_id in range(1, args.num_runs + 1))
 
         for run in result:
@@ -344,21 +364,10 @@ if __name__ == "__main__":
 
     pprint(results)
 
-    if not os.path.exists("./results"):
-        os.mkdir("./results")
 
-    count = 1
-    while (1):
-        if count == 1:
-            num = ""
-        else:
-            num = "_(" + str(count) + ")"
-        if not os.path.exists("./results/{}/{}{}.json".format(args.data, filename, num)):
-            filename += num 
-            break
-        count += 1
-    if not os.path.exists("./results/{}".format(args.data)):
-        os.mkdir("./results/{}".format(args.data))
+
+
+
 
     with open("./results/{}/{}.json".format(args.data, filename), "w") as outfile:
         outfile.write(json.dumps(results, indent=4, default=str))
