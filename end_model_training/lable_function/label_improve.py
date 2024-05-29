@@ -267,7 +267,7 @@ def translate_df(df, dest_language):
     return df
 
 
-def deep_translate_df_to_english(df, auth_key, src_language='ZH', batch_size=50, max_workers=5):
+def deep_translate_df_to_english(df, auth_key, src_language, batch_size=50, max_workers=5):
     df = df.copy()
     texts = df['text'].astype(str).tolist()  # Ensure all texts are strings
     translator = deepl.Translator(auth_key)
@@ -295,6 +295,32 @@ def deep_translate_df_to_english(df, auth_key, src_language='ZH', batch_size=50,
     return df
 
 
+def deep_translate_df(df, auth_key, src_language='ZH', target_language='EN-US', batch_size=50, max_workers=5):
+    df = df.copy()
+    texts = df['text'].astype(str).tolist()  # Ensure all texts are strings
+    translator = deepl.Translator(auth_key)
+    
+    translated_texts = [None] * len(texts)
+
+    def translate_batch(start_index, batch):
+        try:
+            translations = translator.translate_text(batch, source_lang=src_language, target_lang=target_language)
+            return (start_index, [translation.text for translation in translations])
+        except Exception as e:
+            print(f"Error: {e}. Some texts may not be translated.")
+            return (start_index, [None] * len(batch))
+
+    # Create a progress bar
+    with tqdm(total=len(texts), desc="Translating") as pbar:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_index = {executor.submit(translate_batch, i, texts[i:i + batch_size]): i for i in range(0, len(texts), batch_size)}
+            for future in concurrent.futures.as_completed(future_to_index):
+                batch_index, translated_batch = future.result()
+                translated_texts[batch_index:batch_index + len(translated_batch)] = translated_batch
+                pbar.update(len(translated_batch))
+
+    df['text'] = translated_texts
+    return df
 
 
 

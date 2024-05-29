@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 target_dict = {
     'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial'],
-    'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube','massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2'],
+    'acc': ['semeval', 'chemprot', 'agnews', 'imdb', 'trec', 'yelp', 'youtube','massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2', 'massive-JA', 'massive-JA2', 'massive_ja_append', 'massive_ja_inference', 'massive_nbappenden', 'massive_nbappenden2'],
 }
 
 data_to_target = {data: metric for metric, datasets in target_dict.items() for data in datasets}
@@ -72,7 +72,7 @@ def custom_stratified_sample(dataset, input_var, return_dataset=True):
 
 def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, filename, device="cuda", *args,
                **kwargs):
     """
 
@@ -163,6 +163,11 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     lm_test_score = label_model.test(test_data, target)
 
     em_val_score = end_model.test(val_data, target)
+    predicted = end_model.predict_proba(test_data)
+    predicted = np.argmax(predicted, axis=1)
+
+    # moved here for prediciton label saving
+    np.savetxt(filename, predicted, delimiter=",")
     em_test_score = end_model.test(test_data, target)
 
     return {"em_test": em_test_score, "lm_test": lm_test_score,
@@ -171,7 +176,7 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
 
 def train_strong(end_model, train_data, val_data, test_data, train_val_split, seed,
                  target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, stratified, fix_hyperparam, fix_steps, bb,
-                 max_tokens, indep_var, experiment_flag, device="cuda", *args, **kwargs):
+                 max_tokens, indep_var, experiment_flag,  filename,device="cuda", *args, **kwargs):
     """ 
         if training data is not given, 
         partitions the validation data into a training subset and a new (smaller) validation subset
@@ -244,6 +249,12 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     else:
         em_val_score = 1.0
     em_test_score = end_model.test(test_data, target)
+    
+    predicted = end_model.predict_proba(test_data)
+    predicted = np.argmax(predicted, axis=1)
+    # moved here for prediciton label saving
+    np.savetxt(filename, predicted, delimiter=",")
+
     return {"em_test": em_test_score, "em_val": em_val_score}
 
 
@@ -252,7 +263,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
 
 def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, train_val_split,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials, seed,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, model_path, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, model_path, filename, device="cuda", *args,
                **kwargs):
     """
 
@@ -351,6 +362,13 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                     evaluation_step=(fix_steps+1), patience=-1, metric=target, device=device, n_steps=fix_steps, pretrained_model = model_path)
                     
     val_em_val_score = end_model.test(val_data, target)
+    
+    predicted = end_model.predict_proba(test_data)
+    predicted = np.argmax(predicted, axis=1)
+
+    # moved here for prediciton label saving
+    np.savetxt(filename, predicted, delimiter=",")
+    
     val_em_test_score = end_model.test(test_data, target)
 
    
