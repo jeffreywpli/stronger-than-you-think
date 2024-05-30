@@ -110,6 +110,8 @@ if __name__ == "__main__":
 
     parser.add_argument("-stra", "--stratified", help="The number of elements for each class is set specifically to the number given (default: False)", action='store_true')
     
+    parser.add_argument("--store-test-label", help="Store the test labels of a model into a csv file (default: False)", action='store_true')
+
     parser.add_argument("-hl", "--hard-label", help="use hard label for label model (default: False)",
                         action='store_true')
     
@@ -143,7 +145,7 @@ if __name__ == "__main__":
     else:
         jobs = args.jobs
         
-    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
+    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_step, args.store_test_label)
     
     if args.end_model_name is not None:
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
@@ -319,6 +321,7 @@ if __name__ == "__main__":
             model_path=model_path,
             experiment_flag=experiment_flag,
             filename = "./results/{}/{}.csv".format(args.data, filename)
+            store_test = args.store_test_label
         ) for run_id in range(1, args.num_runs + 1))
 
         for run in result:

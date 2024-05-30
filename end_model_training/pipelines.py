@@ -72,7 +72,7 @@ def custom_stratified_sample(dataset, input_var, return_dataset=True):
 
 def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, filename, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, filename, store_test, device="cuda", *args,
                **kwargs):
     """
 
@@ -163,11 +163,13 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
     lm_test_score = label_model.test(test_data, target)
 
     em_val_score = end_model.test(val_data, target)
-    predicted = end_model.predict_proba(test_data)
-    predicted = np.argmax(predicted, axis=1)
+    
+    if store_test:
+        predicted = end_model.predict_proba(test_data)
+        predicted = np.argmax(predicted, axis=1)
+        # moved here for prediciton label saving
+        np.savetxt(filename, predicted, delimiter=",")
 
-    # moved here for prediciton label saving
-    np.savetxt(filename, predicted, delimiter=",")
     em_test_score = end_model.test(test_data, target)
 
     return {"em_test": em_test_score, "lm_test": lm_test_score,
@@ -176,7 +178,7 @@ def train_weak(label_model, end_model, train_data, val_data, test_data, seed,
 
 def train_strong(end_model, train_data, val_data, test_data, train_val_split, seed,
                  target, em_search_space, n_repeats_em, n_trials, n_steps, patience, evaluation_step, stratified, fix_hyperparam, fix_steps, bb,
-                 max_tokens, indep_var, experiment_flag,  filename,device="cuda", *args, **kwargs):
+                 max_tokens, indep_var, experiment_flag,  filename, store_test, device="cuda", *args, **kwargs):
     """ 
         if training data is not given, 
         partitions the validation data into a training subset and a new (smaller) validation subset
@@ -249,11 +251,12 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
     else:
         em_val_score = 1.0
     em_test_score = end_model.test(test_data, target)
-    
-    predicted = end_model.predict_proba(test_data)
-    predicted = np.argmax(predicted, axis=1)
-    # moved here for prediciton label saving
-    np.savetxt(filename, predicted, delimiter=",")
+
+    if store_test:
+        predicted = end_model.predict_proba(test_data)
+        predicted = np.argmax(predicted, axis=1)
+        # moved here for prediciton label saving
+        np.savetxt(filename, predicted, delimiter=",")
 
     return {"em_test": em_test_score, "em_val": em_val_score}
 
@@ -263,7 +266,7 @@ def train_strong(end_model, train_data, val_data, test_data, train_val_split, se
 
 def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, train_val_split,
                target, lm_search_space, em_search_space, n_repeats_lm, n_repeats_em, n_trials, seed,
-               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, model_path, filename, device="cuda", *args,
+               n_steps, patience, evaluation_step, stratified, hard_label, fix_hyperparam, fix_steps, bb, max_tokens, indep_var, model_path, filename, store_test, device="cuda", *args,
                **kwargs):
     """
 
@@ -363,11 +366,12 @@ def fine_tune_on_val(label_model, end_model, train_data, val_data, test_data, tr
                     
     val_em_val_score = end_model.test(val_data, target)
     
-    predicted = end_model.predict_proba(test_data)
-    predicted = np.argmax(predicted, axis=1)
+    if store_test:
+        predicted = end_model.predict_proba(test_data)
+        predicted = np.argmax(predicted, axis=1)
 
-    # moved here for prediciton label saving
-    np.savetxt(filename, predicted, delimiter=",")
+        # moved here for prediciton label saving
+        np.savetxt(filename, predicted, delimiter=",")
     
     val_em_test_score = end_model.test(test_data, target)
 
