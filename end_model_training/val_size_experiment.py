@@ -145,7 +145,7 @@ if __name__ == "__main__":
     else:
         jobs = args.jobs
         
-    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_step, args.store_test_label)
+    print(args.data, args.pipeline, args.label_model, args.end_model, args.end_model_name,args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps, args.store_test_label)
     
     if args.end_model_name is not None:
         filename = get_filename(args.data, args.pipeline, args.label_model, args.end_model + "_" + args.end_model_name, args.backbone, args.stratified, args.hard_label, args.fix_hyperparam, args.fix_steps)
