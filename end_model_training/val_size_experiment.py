@@ -320,7 +320,7 @@ if __name__ == "__main__":
             seed=run_id,
             model_path=model_path,
             experiment_flag=experiment_flag,
-            filename = "./results/{}/{}.csv".format(args.data, filename)
+            filename = "./results/{}/{}.csv".format(args.data, filename),
             store_test = args.store_test_label
         ) for run_id in range(1, args.num_runs + 1))
 
