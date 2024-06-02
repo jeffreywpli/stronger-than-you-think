@@ -4,7 +4,7 @@ from .seqdataset import BaseSeqDataset
 from .torchdataset import sample_batch, TorchDataset, BERTTorchTextClassDataset, BERTTorchRelationClassDataset, ImageTorchDataset
 
 numeric_datasets = ['census', 'mushroom', 'spambase', 'PhishingWebsites', 'Bioresponse', 'bank-marketing', 'basketball', 'tennis', 'commercial']
-text_datasets = ['agnews', 'imdb', 'sms', 'trec', 'yelp', 'youtube', 'banking77', 'amazon31', 'dbpedia', 'massive18', 'claude9', 'massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2', 'massive-JA', 'massive-JA2', 'massive_ja_append', 'massive_ja_inference', 'massive_nbappenden', 'massive_nbappenden2']
+text_datasets = ['agnews', 'imdb', 'sms', 'trec', 'yelp', 'youtube', 'banking77', 'amazon31', 'dbpedia', 'massive18', 'claude9', 'massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2', 'massive-JA', 'massive-JA2', 'massive_ja_append', 'massive_ja_inference', 'massive_nbappenden', 'massive_nbappenden2', 'finbank']
 relation_dataset = ['cdr', 'spouse', 'chemprot', 'semeval', 'chemprot2', 'chemprot2.1', 'chemprot2.2']
 cls_dataset_list = numeric_datasets + text_datasets + relation_dataset
 bin_cls_dataset_list = numeric_datasets + ['cdr', 'spouse', 'sms', 'yelp', 'imdb', 'youtube']
