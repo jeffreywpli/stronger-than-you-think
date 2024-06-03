@@ -29,7 +29,7 @@ from util import *
 torch.backends.cudnn.deterministic = True
 
 #### Just some code to print debug information to stdout
-seed = 3407
+seed = 1989
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
@@ -42,8 +42,9 @@ logger = logging.getLogger(__name__)
 
 target_dict = {
     'f1_binary': ['sms', 'census', 'spouse', 'cdr', 'basketball', 'tennis', 'commercial'],
-    'f1_macro': ['claude9'],
-    'acc': ['semeval', 'agnews', 'imdb', 'trec', 'yelp', 'youtube', 'news-category', 'amazon31', 'banking77', 'massive18', 'dbpedia-219', 'massive_lowcard', 'dbpedia', 'chemprot', 'massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2', 'massive-JA', 'massive-JA2', 'massive_ja_append', 'massive_ja_inference', 'massive_nbappenden', 'massive_nbappenden2'],
+    'f1_macro': ['claude9', 'chemprot2.2'],
+    'f1_micro':['chemprot2.1'],
+    'acc': ['semeval', 'agnews', 'imdb', 'trec', 'yelp', 'youtube', 'news-category', 'amazon31', 'banking77', 'massive18', 'dbpedia-219', 'massive_lowcard', 'dbpedia', 'chemprot', 'massive-EN', 'massive-CN', 'massive-CN2', 'massive-NB', 'massive-NB2', 'massive_cn_inference', 'massive_cn_append', 'massive_nb_inference', 'massive_nb_append', 'massive_highcad', 'massive_highcad2', 'massive-JA', 'massive-JA2', 'massive_ja_append', 'massive_ja_inference', 'massive_nbappenden', 'massive_nbappenden2', 'chemprot2', 'finbank'],
 }
 
 token_dict = {

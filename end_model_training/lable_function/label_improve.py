@@ -51,6 +51,15 @@ def massive_to_df(dataset):
     df = pd.DataFrame(data=data_dict, index=indices)
     return df
 
+def data_to_df(dataset):
+    indices = [int(i) for i in dataset.keys()]
+    text = [dataset[i]['data']['text'] for i in dataset.keys()]    
+    labels = [dataset[i]['label'] for i in dataset.keys()]    
+    weak_labels = [dataset[i]['weak_labels'] for i in dataset.keys()]    
+    data_dict = {'text': text, 'label': labels, 'weak_labels': weak_labels}
+    df = pd.DataFrame(data=data_dict, index=indices)
+    return df
+
 def df_to_chemprot(df):
     dataset = {}
     for index, row in df.iterrows():
@@ -69,6 +78,19 @@ def df_to_chemprot(df):
     return dataset
 
 def df_to_massive(df):
+    dataset = {}
+    for index, row in df.iterrows():
+        data = {
+            'text': row['text']
+        }
+        dataset[str(index)] = {
+            'label': row['label'],
+            'data': data,
+            'weak_labels': row['weak_labels']
+        }
+    return dataset
+
+def df_to_data(df):
     dataset = {}
     for index, row in df.iterrows():
         data = {
@@ -170,6 +192,16 @@ def massive_df_with_new_lf(df, lfs):
     df['weak_labels'] = L_train.tolist()
     # delete the added two column from chemprot_enhanced:
     return df
+
+def df_with_new_lfs(df, lfs):
+    df = df.copy()
+    #apply new lfs
+    applier = PandasLFApplier(lfs=lfs)
+    L_train = applier.apply(df)
+    # add the new lfs to the df's weaklabels column
+    df['weak_labels'] = L_train.tolist()
+    return df
+
 
 def df_to_df_with_new_lf(df_target, df_source, source_lfs):
     df_target = df_target.copy()
