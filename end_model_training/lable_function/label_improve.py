@@ -223,7 +223,6 @@ def see_label_function(df, lfs):
     df = df.drop(df.iloc[drop_indices].index)
     return df, len(df)
 
-
 # utility
 
 def df_with_label(df, label):
@@ -233,71 +232,6 @@ def df_with_label(df, label):
     return df
 
 # translation
-
-def translate_text(text, dest_language):
-    translator = Translator()
-    translation = translator.translate(text, dest=dest_language)
-    return translation.text
-
-def translate_src(text, src_language):
-    translator = Translator()
-    translation = translator.translate(text, src=src_language)
-    return translation.text
-
-# translate df's text to english
-
-# def translate_df_to_english(df, src_language):
-#     tqdm.pandas()
-#     df = df.copy()
-#     # df['text'] = df['text'].apply(lambda x: translate_src(x,  src_language))
-#     df['text'] = df['text'].progress_apply(lambda x: translate_src(x,  src_language))
-#     return df
-
-def translate_df_to_english(df, src_language, batch_size=25):
-    df = df.copy()
-    texts = df['text'].astype(str).tolist()  # Ensure all texts are strings
-    translator = GoogleTranslator(source=src_language, target='en')
-    
-    translated_texts = []
-    
-    # Create a progress bar
-    for i in tqdm(range(0, len(texts), batch_size), desc="Translating"):
-        batch = texts[i:i + batch_size]
-        try:
-            translations = translator.translate_batch(batch)
-            translated_texts.extend(translations)
-        except Exception as e:
-            print(f"Error: {e}. Some texts may not be translated.")
-            translated_texts.extend([None] * len(batch))  # Fill with None if translation fails
-
-    df['text'] = translated_texts
-    return df
-
-
-# def translate_df_to_english(df, src_language, batch_size=100):
-#     df = df.copy()
-#     texts = df['text'].tolist()
-#     translator = Translator()
-    
-#     translated_texts = []
-    
-#     # Create a progress bar
-#     for i in tqdm(range(0, len(texts), batch_size), desc="Translating"):
-#         batch = texts[i:i + batch_size]
-#         translations = translator.translate(batch, src=src_language, dest='en')
-#         translated_texts.extend([translation.text for translation in translations])
-    
-#     df['text'] = translated_texts
-#     return df
-
-
-# translate df's text to another language
-
-def translate_df(df, dest_language):
-    df = df.copy()
-    df['text'] = df['text'].apply(lambda x: translate_text(x, dest_language))
-    return df
-
 
 def deep_translate_df_to_english(df, auth_key, src_language, batch_size=50, max_workers=5):
     df = df.copy()
@@ -354,19 +288,7 @@ def deep_translate_df(df, auth_key, src_language='ZH', target_language='EN-US', 
     df['text'] = translated_texts
     return df
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Analyze the df with lfs
 def analysis_LFs(lfs, df, class_size):
     L_dev = apply_LFs(lfs, df)
     print("Test Coverage:", calc_coverage(L_dev))
@@ -379,7 +301,8 @@ def analysis_LFs(lfs, df, class_size):
     print("acuracy for all")
     print((preds_valid == df.label.values).mean())
     return lf_analysis
-    
+
+# analyze the df with weak labels
 def analysis_LFs_with_weak_labels(df, class_size):
     L_dev = np.array(df.weak_labels.tolist())
     print("Test Coverage:", calc_coverage(L_dev))

@@ -2,10 +2,7 @@
 
 This project focuses on idenitifying real-life datasets that weak supervision excells at. It is based on the [`WRENCH`](https://github.com/JieyuZ2/wrench). Some of the pipeline design are consistent with paper [*Weaker Than You Think: A Critical Look at Weakly Supervised Learning*](https://arxiv.org/pdf/2305.17442.pdf).
 
-<p float="left">
-  <img src="/end_model_training/graphs/figs/Stronger Than You Think Neurips 2024 Dataset.jpg" alt="Image 1" width="45%" />
-  <img src="/end_model_training/graphs/figs/Stronger Than You Think Neurips 2024.jpg" alt="Image 2" width="45%" />
-</p>
+![CFT](/end_model_training/graphs/figs/CFT_w.jpg)
 
 ## Installation
 
