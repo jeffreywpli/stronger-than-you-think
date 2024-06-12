@@ -127,3 +127,7 @@ If running grid search with Cosine as an end model with parallelism enabled, the
 [2]
 
 The `val-as-train`, `fine-tune-on-val` pipeline are consistent with the only clean data experiment and  continous fine-tuning experiment (CFT) of the *Weaker than you think paper*. Note that the paper used fixed hyperparameter and fixed step size for some of its experiment. Thus the flags `--fix-hyperparam`, `--fix-steps` should be used. In order to the RoBERTa model, see the [example](#examples-of-codes) above.
+
+## Datasets
+
+Our datasets are published and located at https://drive.google.com/drive/folders/1P8quDeZaDNmQ_N9C4tkfiQZAYl5hV6PF?usp=drive_link, refer to the appendix section of the paper for liscense information.
