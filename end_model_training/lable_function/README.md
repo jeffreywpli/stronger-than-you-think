@@ -21,5 +21,4 @@ Example output:
 
 # LLM assit LF construction
 
-notebook: `llm_{datasetname}.ipynb` consist of the code to use LLM to assist the construction of label functions. The prompt for the LLM is included in `llm_prompt` directory. 
-
+notebook: `llm_{datasetname}.ipynb` consist of the code to use LLM to assist the construction of label functions. The prompt for the LLM is included in `llm_prompt` directory. The result of using 'gpt-4o-2024-08-06' as basline model is included in `llm_baseline` directory.
