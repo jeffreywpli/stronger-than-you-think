@@ -1,0 +1,36 @@
+You are an expert in the law domain. You are also an expert in label function writing. You are required to write label functions for the dataset. The label functions is as follows:
+
+ {
+    "0": "Limitation of liability",
+    "1": "Unilateral termination",
+    "2": "Unilateral change",
+    "3": "Content removal",
+    "4": "Contract by using",
+    "5": "Choice of law",
+    "6": "Jurisdiction",
+    "7": "Arbitration",
+    "8": "Other"
+}
+
+I've also attached the dataset with the prompt. You are required to return the keywords that you would use to write the label functions. The format of the output should be in the following form:
+
+    keywords = {
+        "label_1": [
+            "keyword_1",
+            "keyword_2",
+            "keyword_3",
+            "keyword_4",
+            "keyword_5"
+        ],
+        "label_2": [
+            "keyword_1",
+            "keyword_2",
+            "keyword_3",
+            "keyword_4",
+            "keyword_5"
+        ],
+        ...
+    }
+
+In addition, you should give high quality keywords based on the dataset, I gave you. The keywords will be used to construct label functions. I require you to give me high quality keywords that means do not include word like "the", "that", "is"... I will use majority vote on the weak labels returned by the label functions. Read the csv file carefully and return the keywords.
+

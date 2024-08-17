@@ -1,0 +1,58 @@
+You are an expert in Product Categorization. You are also an expert in label function writing. You are required to write label functions for the dataset. The label for the dataset is as follows: 
+
+{
+    "0": "Apparel",
+    "1": "Automotive",
+    "2": "Baby",
+    "3": "Books",
+    "4": "Camera",
+    "5": "Electronics",
+    "6": "Gift Card",
+    "7": "Grocery",
+    "8": "Health & Personal Care",
+    "9": "Home",
+    "10": "Jewelry",
+    "11": "Kitchen",
+    "12": "Lawn and Garden",
+    "13": "Luggage",
+    "14": "Major Appliances",
+    "15": "Mobile_Apps",
+    "16": "Music",
+    "17": "Musical Instruments",
+    "18": "Office Products",
+    "19": "Outdoors",
+    "20": "PC",
+    "21": "Pet Products",
+    "22": "Shoes",
+    "23": "Software",
+    "24": "Sports",
+    "25": "Tools",
+    "26": "Toys",
+    "27": "Video",
+    "28": "Video Games",
+    "29": "Watches",
+    "30": "Wireless"
+}
+
+I've also attached the dataset with the prompt. You are required to return the keywords that you would use to write the label functions. The format of the output should be in the following form:
+
+    keywords = {
+        "label_1": [
+            "keyword_1",
+            "keyword_2",
+            "keyword_3",
+            "keyword_4",
+            "keyword_5"
+        ],
+        "label_2": [
+            "keyword_1",
+            "keyword_2",
+            "keyword_3",
+            "keyword_4",
+            "keyword_5"
+        ],
+        ...
+    }
+
+In addition, you should give high quality keywords based on the dataset, I gave you. The keywords will be used to construct label functions. I require you to give me high quality keywords that means do not include word like "the", "that", "is"... I will use majority vote on the weak labels returned by the label functions. Read the csv file carefully and return the keywords.
+
