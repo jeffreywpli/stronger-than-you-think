@@ -17,6 +17,10 @@ pip install git+https://github.com/openai/CLIP.git
 
 ## Structure of the project
 
+### Label Functions Construction 
+
+Our label function construction notebooks and utility functions are in [/end_model_training/lable_functions](https://github.com/jeffreywpli/stronger-than-you-think/tree/main/end_model_training/lable_function)
+
 ### Pipeline
 
 The **`val_size_experiment.py`** file handles the user argument of the experiments and calls corresponding pipelines in **`pipelines.py`** to run the experiments.
