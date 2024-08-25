@@ -1,5 +1,10 @@
 # Label Functions
 
+
+We include the details for ChemProt LFs improvement at path [ChemProt](chemprot).
+
+
+## Utility
 We include the notebooks for label functions in this directory:
 
 - `label_improve.py`: This python script contains two important functions help us to evaluate the quality of each indvidual label functions. 
